@@ -24,30 +24,7 @@ import {
 } from "lucide-react";
 import { NavUser } from "./NavUser";
 
-const prefix = "/admin";
-
-const masterDataItems = [
-  {
-    title: "Products",
-    url: `${prefix}/products`,
-    icon: Box,
-  },
-  {
-    title: "Categories",
-    url: `${prefix}/categories`,
-    icon: Tag,
-  },
-  {
-    title: "Roles",
-    url: `${prefix}/roles`,
-    icon: Users,
-  },
-  {
-    title: "Users",
-    url: `${prefix}/users`,
-    icon: User,
-  },
-];
+const prefix = "/customer";
 
 const transactionalItems = [
   {
@@ -67,12 +44,11 @@ const transactionalItems = [
   },
 ];
 const user = {
-  name: localStorage?.getItem("userName"),
-  email: localStorage?.getItem("userEmail"),
-  role: localStorage?.getItem("userRoleName"),
+  name: "shadcn",
+  email: "m@example.com",
   avatar: "/avatars/shadcn.jpg",
 };
-export function AppSidebar() {
+export function CustomerSidebar() {
   return (
     <Sidebar>
       {/* Logo Section */}
@@ -97,28 +73,6 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {transactionalItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a
-                      href={item.url}
-                      className="flex items-center space-x-2 text-gray-700 hover:text-gray-900"
-                    >
-                      <item.icon className="h-5 w-5 text-gray-500" />
-                      <p className="text-base">{item.title}</p>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Master Data Group */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Master Data</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {masterDataItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <a

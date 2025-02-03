@@ -23,32 +23,28 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useGetRolesQuery, useDeleteRoleMutation } from "../../../services/api"; // Import RTK Query hooks
-import { useRouter } from "next/navigation";
+import { useGetUsersQuery, useDeleteUserMutation } from "../../../services/api"; // Import RTK Query hooks
+import { useRouter } from "next/router";
 
-export default function Roles() {
+export default function Users() {
   const router = useRouter();
+  const { data: users } = useGetUsersQuery();
+  const [deleteUser] = useDeleteUserMutation();
 
-  const { data: roles } = useGetRolesQuery();
-  const [deleteRole] = useDeleteRoleMutation();
-
-  const handleAdd = () => {
-    router.push("/admin/roles/create");
-  };
-  const handleUpdate = (id: number) => {
-    router.push(`/admin/roles/${id}/update`);
+  const handleAddUser = () => {
+    router.push("/admin/users/create");
   };
 
-  const handleDeleteRole = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this role?")) {
+  const handleUpdateUser = (id: number) => {
+    router.push(`/admin/users/${id}/update`);
+  };
+
+  const handleDeleteUser = async (id: number) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
       try {
-        await deleteRole(id);
-        alert("Role deleted successfully!");
-        setTimeout(() => {
-          router.push("/admin/roles");
-        }, 500);
+        await deleteUser(id);
       } catch (err) {
-        console.error("Failed to delete role:", err);
+        console.error("Failed to delete user:", err);
       }
     }
   };
@@ -58,7 +54,7 @@ export default function Roles() {
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <div className="flex">
           <h1 className="text-2xl font-semibold leading-tight tracking-tight">
-            Roles Management
+            Users Management
           </h1>
         </div>
         <div className="flex">
@@ -67,10 +63,10 @@ export default function Roles() {
               variant="default"
               size="lg"
               className="h-7 gap-1 text-sm"
-              onClick={() => handleAdd()}
+              onClick={() => handleAddUser()}
             >
               <PlusCircle className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only">Add Role</span>
+              <span className="sr-only sm:not-sr-only">Add User</span>
             </Button>
           </div>
         </div>
@@ -78,9 +74,9 @@ export default function Roles() {
         {/* Data Table Card */}
         <Card className="w-full">
           <CardHeader>
-            <CardTitle>Roles</CardTitle>
+            <CardTitle>Users</CardTitle>
             <CardDescription>
-              Manage and view roles and their details here.
+              Manage and view users and their details here.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -90,30 +86,32 @@ export default function Roles() {
                   <TableHead className="hidden w-[50px] sm:table-cell">
                     #
                   </TableHead>
-                  <TableHead className="w-[100px]">Role ID</TableHead>
+                  <TableHead className="w-[100px]">User ID</TableHead>
                   <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
                   <TableHead>Created At</TableHead>
                   <TableHead>Updated At</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {roles?.length == 0 ? (
+                {users?.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4">
-                      No roles available.
+                    <TableCell colSpan={7} className="text-center py-4">
+                      No users available.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  roles?.map((role, index) => (
-                    <TableRow key={role.id}>
+                  users?.map((user, index) => (
+                    <TableRow key={user.id}>
                       <TableCell className="hidden sm:table-cell">
                         {index + 1}
                       </TableCell>
-                      <TableCell>ROLE-00{role.id}</TableCell>
-                      <TableCell className="font-medium">{role.name}</TableCell>
-                      <TableCell>{role.createdAt}</TableCell>
-                      <TableCell>{role.updatedAt}</TableCell>
+                      <TableCell>USER-00{user.id}</TableCell>
+                      <TableCell className="font-medium">{user.name}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{user.createdAt}</TableCell>
+                      <TableCell>{user.updatedAt}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -130,13 +128,13 @@ export default function Roles() {
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem
                               className="cursor-pointer"
-                              onClick={() => handleUpdate(role.id)}
+                              onClick={() => handleUpdateUser(user.id)}
                             >
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               className="cursor-pointer"
-                              onClick={() => handleDeleteRole(role.id)}
+                              onClick={() => handleDeleteUser(user.id)}
                             >
                               Delete
                             </DropdownMenuItem>

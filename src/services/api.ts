@@ -15,6 +15,8 @@ interface Product {
   price: number;
   stock: number;
   categoryId: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Tipe untuk Cart
@@ -65,7 +67,7 @@ interface User {
 }
 
 // Tipe untuk Role
-interface Role {
+export interface Role {
   id: number;
   name: string;
   createdAt: string;
@@ -91,11 +93,18 @@ interface ErrorLog {
   updatedAt: string;
 }
 
-// API Service untuk semua model
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000/api", // Ganti dengan URL backend kamu
+    baseUrl: `${process.env.NEXT_PUBLIC_API_URL}/api`,
+    // Add token to the request headers if available
+    prepareHeaders: (headers) => {
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+      return headers;
+    },
   }),
   endpoints: (builder) => ({
     // Produk Endpoints
@@ -169,6 +178,10 @@ export const api = createApi({
       query: () => "/cartitems",
       transformResponse: (response: ApiResponse<CartItem[]>) => response.data,
     }),
+    getCartItemById: builder.query<CartItem, number>({
+      query: (id) => `/cartitems/${id}`,
+      transformResponse: (response: ApiResponse<CartItem>) => response.data,
+    }),
     createCartItem: builder.mutation<CartItem, Partial<CartItem>>({
       query: (newCartItem) => ({
         url: "/cartitems",
@@ -197,6 +210,10 @@ export const api = createApi({
     getCategories: builder.query<Category[], void>({
       query: () => "/categories",
       transformResponse: (response: ApiResponse<Category[]>) => response.data,
+    }),
+    getCategoryById: builder.query<Category, number>({
+      query: (id) => `/categories/${id}`,
+      transformResponse: (response: ApiResponse<Category>) => response.data,
     }),
     createCategory: builder.mutation<Category, Partial<Category>>({
       query: (newCategory) => ({
@@ -227,6 +244,10 @@ export const api = createApi({
       query: () => "/orders",
       transformResponse: (response: ApiResponse<Order[]>) => response.data,
     }),
+    getOrderById: builder.query<Order, number>({
+      query: (id) => `/orders/${id}`,
+      transformResponse: (response: ApiResponse<Order>) => response.data,
+    }),
     createOrder: builder.mutation<Order, Partial<Order>>({
       query: (newOrder) => ({
         url: "/orders",
@@ -256,6 +277,10 @@ export const api = createApi({
       query: () => "/users",
       transformResponse: (response: ApiResponse<User[]>) => response.data,
     }),
+    getUserById: builder.query<User, number>({
+      query: (id) => `/users/${id}`,
+      transformResponse: (response: ApiResponse<User>) => response.data,
+    }),
     createUser: builder.mutation<User, Partial<User>>({
       query: (newUser) => ({
         url: "/users",
@@ -284,6 +309,10 @@ export const api = createApi({
     getRoles: builder.query<Role[], void>({
       query: () => "/roles",
       transformResponse: (response: ApiResponse<Role[]>) => response.data,
+    }),
+    getRoleById: builder.query<Role, number>({
+      query: (id) => `/roles/${id}`,
+      transformResponse: (response: ApiResponse<Role>) => response.data,
     }),
     createRole: builder.mutation<Role, Partial<Role>>({
       query: (newRole) => ({
@@ -315,40 +344,61 @@ export const api = createApi({
       transformResponse: (response: ApiResponse<ActivityLog[]>) =>
         response.data,
     }),
+    getActivityLogById: builder.query<ActivityLog, number>({
+      query: (id) => `/activitylogs/${id}`,
+      transformResponse: (response: ApiResponse<ActivityLog>) => response.data,
+    }),
 
     // ErrorLog Endpoints
     getErrorLogs: builder.query<ErrorLog[], void>({
       query: () => "/errorlogs",
       transformResponse: (response: ApiResponse<ErrorLog[]>) => response.data,
     }),
+    getErrorLogById: builder.query<ErrorLog, number>({
+      query: (id) => `/errorlogs/${id}`,
+      transformResponse: (response: ApiResponse<ErrorLog>) => response.data,
+    }),
   }),
 });
 
 export const {
   useGetProductsQuery,
+  useGetProductByIdQuery,
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
   useGetCartsQuery,
+  useGetCartByIdQuery,
   useCreateCartMutation,
   useUpdateCartMutation,
   useDeleteCartMutation,
+  useGetCartItemsQuery,
+  useGetCartItemByIdQuery,
+  useCreateCartItemMutation,
+  useUpdateCartItemMutation,
+  useDeleteCartItemMutation,
   useGetCategoriesQuery,
+  useGetCategoryByIdQuery,
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
   useDeleteCategoryMutation,
   useGetOrdersQuery,
+  useGetOrderByIdQuery,
   useCreateOrderMutation,
   useUpdateOrderMutation,
   useDeleteOrderMutation,
   useGetUsersQuery,
+  useGetUserByIdQuery,
   useCreateUserMutation,
   useUpdateUserMutation,
   useDeleteUserMutation,
   useGetRolesQuery,
+  useGetRoleByIdQuery,
   useCreateRoleMutation,
   useUpdateRoleMutation,
   useDeleteRoleMutation,
   useGetActivityLogsQuery,
+  useGetActivityLogByIdQuery,
   useGetErrorLogsQuery,
+  useGetErrorLogByIdQuery,
 } = api;

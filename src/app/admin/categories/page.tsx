@@ -23,32 +23,35 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useGetRolesQuery, useDeleteRoleMutation } from "../../../services/api"; // Import RTK Query hooks
+import {
+  useGetCategoriesQuery,
+  useDeleteCategoryMutation,
+} from "../../../services/api"; // Import RTK Query hooks
 import { useRouter } from "next/navigation";
 
-export default function Roles() {
+export default function Categories() {
   const router = useRouter();
 
-  const { data: roles } = useGetRolesQuery();
-  const [deleteRole] = useDeleteRoleMutation();
+  const { data: categories } = useGetCategoriesQuery();
+  const [deleteCategory] = useDeleteCategoryMutation();
 
   const handleAdd = () => {
-    router.push("/admin/roles/create");
+    router.push("/admin/categories/create");
   };
   const handleUpdate = (id: number) => {
-    router.push(`/admin/roles/${id}/update`);
+    router.push(`/admin/categories/${id}/update`);
   };
-
-  const handleDeleteRole = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this role?")) {
+  const handleDeleteCategory = async (id: number) => {
+    if (window.confirm("Are you sure you want to delete this category?")) {
       try {
-        await deleteRole(id);
-        alert("Role deleted successfully!");
+        await deleteCategory(id);
+        alert("Category deleted successfully!");
+
         setTimeout(() => {
-          router.push("/admin/roles");
+          router.push("/admin/categories");
         }, 500);
       } catch (err) {
-        console.error("Failed to delete role:", err);
+        console.error("Failed to delete category:", err);
       }
     }
   };
@@ -58,7 +61,7 @@ export default function Roles() {
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <div className="flex">
           <h1 className="text-2xl font-semibold leading-tight tracking-tight">
-            Roles Management
+            Categories Management
           </h1>
         </div>
         <div className="flex">
@@ -70,7 +73,7 @@ export default function Roles() {
               onClick={() => handleAdd()}
             >
               <PlusCircle className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only">Add Role</span>
+              <span className="sr-only sm:not-sr-only">Add Category</span>
             </Button>
           </div>
         </div>
@@ -78,9 +81,9 @@ export default function Roles() {
         {/* Data Table Card */}
         <Card className="w-full">
           <CardHeader>
-            <CardTitle>Roles</CardTitle>
+            <CardTitle>Categories</CardTitle>
             <CardDescription>
-              Manage and view roles and their details here.
+              Manage and view categories and their details here.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -90,7 +93,7 @@ export default function Roles() {
                   <TableHead className="hidden w-[50px] sm:table-cell">
                     #
                   </TableHead>
-                  <TableHead className="w-[100px]">Role ID</TableHead>
+                  <TableHead className="w-[100px]">Category ID</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Created At</TableHead>
                   <TableHead>Updated At</TableHead>
@@ -98,22 +101,26 @@ export default function Roles() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {roles?.length == 0 ? (
+                {categories?.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-4">
-                      No roles available.
+                      No categories available.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  roles?.map((role, index) => (
-                    <TableRow key={role.id}>
+                  categories?.map((category, index) => (
+                    <TableRow key={category.id}>
                       <TableCell className="hidden sm:table-cell">
                         {index + 1}
                       </TableCell>
-                      <TableCell>ROLE-00{role.id}</TableCell>
-                      <TableCell className="font-medium">{role.name}</TableCell>
-                      <TableCell>{role.createdAt}</TableCell>
-                      <TableCell>{role.updatedAt}</TableCell>
+                      <TableCell className="w-[200px]">
+                        CATEGORY-00{category.id}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {category.name}
+                      </TableCell>
+                      <TableCell>{category.createdAt}</TableCell>
+                      <TableCell>{category.updatedAt}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -130,13 +137,13 @@ export default function Roles() {
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem
                               className="cursor-pointer"
-                              onClick={() => handleUpdate(role.id)}
+                              onClick={() => handleUpdate(category.id)}
                             >
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               className="cursor-pointer"
-                              onClick={() => handleDeleteRole(role.id)}
+                              onClick={() => handleDeleteCategory(category.id)}
                             >
                               Delete
                             </DropdownMenuItem>

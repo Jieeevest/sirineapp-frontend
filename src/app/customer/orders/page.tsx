@@ -1,14 +1,4 @@
 "use client";
-
-import { MoreHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -24,24 +14,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  useGetOrdersQuery,
-  useDeleteOrderMutation,
-} from "../../../services/api"; // Import RTK Query hooks
+import { useGetOrdersQuery } from "../../../services/api";
 
 export default function Orders() {
   const { data: orders } = useGetOrdersQuery();
-  const [deleteOrder] = useDeleteOrderMutation();
-
-  const handleDeleteOrder = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this order?")) {
-      try {
-        await deleteOrder(id);
-      } catch (err) {
-        console.log(err);
-      }
-    }
-  };
 
   return (
     <div className="flex min-h-screen w-full min-w-[1000px] flex-col">
@@ -73,7 +49,6 @@ export default function Orders() {
                   <TableHead>Status</TableHead>
                   <TableHead>Created At</TableHead>
                   <TableHead>Updated At</TableHead>
-                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -95,29 +70,6 @@ export default function Orders() {
                       <TableCell>{order.status}</TableCell>
                       <TableCell>{order.createdAt}</TableCell>
                       <TableCell>{order.updatedAt}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              aria-haspopup="true"
-                              size="icon"
-                              variant="ghost"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Toggle menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="start">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleDeleteOrder(order.id)}
-                            >
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
                     </TableRow>
                   ))
                 )}
