@@ -23,19 +23,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useGetRolesQuery, useDeleteRoleMutation } from "../../../services/api"; // Import RTK Query hooks
+import { useGetRolesQuery, useDeleteRoleMutation } from "../../../services/api";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Roles() {
   const router = useRouter();
-
   const { data: roles } = useGetRolesQuery();
   const [deleteRole] = useDeleteRoleMutation();
 
-  const handleAdd = () => {
+  // State for pagination and search
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Set how many items per page
+
+  const handleAddRole = () => {
     router.push("/admin/roles/create");
   };
-  const handleUpdate = (id: number) => {
+
+  const handleUpdateRole = (id: number) => {
     router.push(`/admin/roles/${id}/update`);
   };
 
@@ -43,36 +49,68 @@ export default function Roles() {
     if (window.confirm("Are you sure you want to delete this role?")) {
       try {
         await deleteRole(id);
-        alert("Role deleted successfully!");
-        setTimeout(() => {
-          router.push("/admin/roles");
-        }, 500);
       } catch (err) {
         console.error("Failed to delete role:", err);
       }
     }
   };
 
+  // Filter roles by search term
+  const filteredRoles = roles?.filter((role) =>
+    role.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Paginate the filtered roles
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentRoles = filteredRoles?.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Handle search input change
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to the first page when the search term changes
+  };
+
+  // Handle page change
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Calculate total pages
+  const totalPages = Math.ceil(
+    (filteredRoles?.length ? filteredRoles?.length : 0) / itemsPerPage
+  );
+
   return (
     <div className="flex min-h-screen w-full min-w-[1000px] flex-col">
-      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <div className="flex">
-          <h1 className="text-2xl font-semibold leading-tight tracking-tight">
+      <main className="flex flex-1 flex-col gap-4 p-4 md:p-8">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-semibold leading-tight tracking-tight text-gray-800">
             Roles Management
           </h1>
+          <Button
+            variant="default"
+            size="lg"
+            className="h-10 gap-2 text-sm bg-blue-600 text-white hover:bg-blue-700"
+            onClick={handleAddRole}
+          >
+            <PlusCircle className="h-5 w-5" />
+            <span>Add Role</span>
+          </Button>
         </div>
-        <div className="flex">
-          <div className="flex gap-2">
-            <Button
-              variant="default"
-              size="lg"
-              className="h-7 gap-1 text-sm"
-              onClick={() => handleAdd()}
-            >
-              <PlusCircle className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only">Add Role</span>
-            </Button>
-          </div>
+
+        {/* Search Bar */}
+        <div className="mb-2 mt-4">
+          <label className="block text-sm font-semibold text-gray-700">
+            Search Keyword
+          </label>
+          <input
+            type="text"
+            placeholder="Search Roles..."
+            value={searchTerm}
+            onChange={handleSearch}
+            className="p-3 border rounded-lg w-full"
+          />
         </div>
 
         {/* Data Table Card */}
@@ -98,14 +136,14 @@ export default function Roles() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {roles?.length == 0 ? (
+                {currentRoles?.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4">
+                    <TableCell colSpan={7} className="text-center py-4">
                       No roles available.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  roles?.map((role, index) => (
+                  currentRoles?.map((role, index) => (
                     <TableRow key={role.id}>
                       <TableCell className="hidden sm:table-cell">
                         {index + 1}
@@ -130,7 +168,7 @@ export default function Roles() {
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem
                               className="cursor-pointer"
-                              onClick={() => handleUpdate(role.id)}
+                              onClick={() => handleUpdateRole(role.id)}
                             >
                               Edit
                             </DropdownMenuItem>
@@ -150,6 +188,25 @@ export default function Roles() {
             </Table>
           </CardContent>
         </Card>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center mt-4 space-x-2">
+            {Array.from({ length: totalPages }, (_, index) => (
+              <Button
+                key={index + 1}
+                onClick={() => handlePageChange(index + 1)}
+                className={`${
+                  currentPage === index + 1
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-800"
+                } px-4 py-2 rounded-md text-sm`}
+              >
+                {index + 1}
+              </Button>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );

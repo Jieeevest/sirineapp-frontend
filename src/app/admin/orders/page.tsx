@@ -27,12 +27,18 @@ import {
 import {
   useGetOrdersQuery,
   useDeleteOrderMutation,
-} from "../../../services/api"; // Import RTK Query hooks
+} from "../../../services/api";
+import { useState } from "react";
 
 export default function Orders() {
-  const { data: orders } = useGetOrdersQuery();
+  const { data: orders, isLoading } = useGetOrdersQuery();
   const [deleteOrder] = useDeleteOrderMutation();
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // Handle deletion
   const handleDeleteOrder = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this order?")) {
       try {
@@ -43,13 +49,52 @@ export default function Orders() {
     }
   };
 
+  // Handle search change
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset pagination to first page
+  };
+
+  // Filter orders based on search term
+  const filteredOrders = orders?.filter(
+    (order) =>
+      order.id.toString().includes(searchTerm) ||
+      order.userId.toString().includes(searchTerm)
+  );
+
+  // Paginate orders
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentOrders = filteredOrders?.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+
+  const totalPages = Math.ceil(
+    (filteredOrders?.length ? filteredOrders?.length : 0) / itemsPerPage
+  );
+
   return (
     <div className="flex min-h-screen w-full min-w-[1000px] flex-col">
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <div className="flex">
+        <div className="flex justify-between">
           <h1 className="text-2xl font-semibold leading-tight tracking-tight">
             Orders Management
           </h1>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-2 mt-4">
+          <label className="block text-sm font-semibold text-gray-700">
+            Search Orders
+          </label>
+          <input
+            type="text"
+            placeholder="Search by Order ID or User ID..."
+            value={searchTerm}
+            onChange={handleSearch}
+            className="p-3 border rounded-lg w-full"
+          />
         </div>
 
         {/* Data Table Card */}
@@ -77,14 +122,20 @@ export default function Orders() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders?.length === 0 ? (
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-4">
+                      Loading...
+                    </TableCell>
+                  </TableRow>
+                ) : currentOrders?.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-4">
                       No orders available.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  orders?.map((order, index) => (
+                  currentOrders?.map((order, index) => (
                     <TableRow key={order.id}>
                       <TableCell className="hidden sm:table-cell">
                         {index + 1}
@@ -125,6 +176,25 @@ export default function Orders() {
             </Table>
           </CardContent>
         </Card>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center mt-4 space-x-2">
+            {Array.from({ length: totalPages }, (_, index) => (
+              <Button
+                key={index + 1}
+                onClick={() => setCurrentPage(index + 1)}
+                className={`${
+                  currentPage === index + 1
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-800"
+                } px-4 py-2 rounded-md text-sm`}
+              >
+                {index + 1}
+              </Button>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );

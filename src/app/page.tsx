@@ -242,7 +242,43 @@ export default function SirineSaleLanding() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <section className="relative h-screen flex items-center justify-center overflow-hidden px-6">
+      <header className="bg-white text-gray-800 py-4">
+        <Container>
+          <div className="flex justify-between items-center">
+            <div className="text-2xl font-bold">
+              <a
+                href="#"
+                className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600"
+                style={{
+                  textShadow:
+                    "2px 2px 4px rgba(0, 0, 0, 0.3), 0 0 25px rgba(0, 0, 0, 0.3), 0 0 50px rgba(0, 0, 0, 0.3)",
+                }}
+              >
+                Gudang Sirine
+              </a>
+            </div>
+
+            <nav>
+              <ul className="flex space-x-8">
+                <li>
+                  <a
+                    href="#sirens"
+                    className="hover:text-blue-400"
+                    style={{
+                      textShadow:
+                        "2px 2px 4px rgba(0, 0, 0, 0.3), 0 0 25px rgba(0, 0, 0, 0.3), 0 0 50px rgba(0, 0, 0, 0.3)",
+                      transition: "all 0.3s ease", // Smooth transition for hover
+                    }}
+                  >
+                    Sign In
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </Container>
+      </header>
+      <section className="relative h-[800px] flex items-center justify-center overflow-hidden px-6">
         <Image
           src="https://img.freepik.com/premium-photo/blue-police-car-light-night-city-with-selective-focus-bokeh-black-background_636705-5794.jpg?semt=ais_hybrid"
           alt="Sirine Perfume Background"
@@ -250,10 +286,21 @@ export default function SirineSaleLanding() {
           className="absolute z-0 object-cover opacity-100"
         />
         <div className="relative z-10 text-center max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 md:mb-8">
+          <h1
+            className="text-5xl md:text-7xl font-extrabold text-white mb-6 md:mb-8"
+            style={{
+              textShadow:
+                "3px 3px 5px rgba(0, 0, 0, 0.3), 0 0 25px rgba(0, 0, 0, 0.3), 0 0 50px rgba(0, 0, 0, 0.3)",
+            }}
+          >
             Sirine Fragrances
           </h1>
-          <p className="text-xl md:text-2xl text-white mb-10 md:mb-12">
+          <p
+            className="text-xl md:text-2xl text-white mb-10 md:mb-12"
+            style={{
+              textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+            }}
+          >
             Discover the essence of elegance with our exclusive fragrances
           </p>
         </div>
@@ -274,7 +321,7 @@ export default function SirineSaleLanding() {
             </div>
             <Button
               onClick={() => setIsCartOpen(true)} // Open the modal
-              className="bg-gradient-to-r from-blue-600 to-indigo-500 text-white px-8 py-3 rounded-full shadow-lg transition-all hover:scale-105 hover:from-blue-500 hover:to-indigo-400"
+              className="border-[1px] border-gray-300 shadow-sm bg-gradient-to-r from-blue-600 to-indigo-500 text-white px-8 py-3 rounded-full transition-all hover:scale-105 hover:from-blue-600 hover:to-indigo-500"
             >
               <span className="text-lg font-semibold">View Cart</span>
             </Button>
@@ -289,11 +336,11 @@ export default function SirineSaleLanding() {
             {categories.map((category) => (
               <Button
                 key={category}
-                className={`${
+                className={`border-[1px] border-gray-300 ${
                   selectedCategory === category
                     ? "bg-black text-white hover:bg-gray-800"
-                    : "bg-white text-black hover:bg-gray-200"
-                } px-6 py-2 rounded-full shadow-md transition-all`}
+                    : "bg-white text-black hover:bg-gray-50"
+                } px-6 py-2 rounded-full shadow-sm transition-all hover:scale-110`}
                 onClick={() => setSelectedCategory(category)}
               >
                 {category}
@@ -321,7 +368,7 @@ export default function SirineSaleLanding() {
                 {products[selectedCategory]?.map((item, index) => (
                   <Card
                     key={index}
-                    className={`bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-all hover:scale-105 hover:shadow-black/20 ease-in-out`}
+                    className={`bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-all hover:scale-105 hover:shadow-black/20 ease-in-out border-[1px] border-gray-300 hover:cursor-pointer`}
                   >
                     <Image
                       src={item.image}
@@ -341,7 +388,7 @@ export default function SirineSaleLanding() {
 
                     <CardContent className="p-4">
                       <p className="text-gray-700 text-lg font-bold">
-                        <span className="mr-2">Rp.{item.price}</span>
+                        <span className="mr-2">Rp{item.price},-</span>
                       </p>
                       <Button
                         className="mt-4 w-full bg-gray-800 hover:bg-gray-900 hover:scale-105 text-white"
@@ -365,11 +412,11 @@ export default function SirineSaleLanding() {
             <DialogTitle>Your Cart</DialogTitle>
           </DialogHeader>
           {cart.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-2">
               {cart.map((item, index) => (
                 <div
                   key={index}
-                  className="flex justify-between items-center bg-gray-100 p-4 rounded-lg max-h-96 overflow-y-auto"
+                  className="flex justify-between items-center bg-gray-100 p-4 rounded-lg max-h-96 overflow-y-auto border-[1px] border-gray-300"
                 >
                   <div className="mr-10">
                     <p className="text-lg font-medium">{item.name}</p>

@@ -11,28 +11,51 @@ interface Category {
   name: string;
 }
 
+interface FormState {
+  category: Category;
+  error: string;
+  isSubmitting: boolean;
+}
+
+const initialState: FormState = {
+  category: { name: "" },
+  error: "",
+  isSubmitting: false,
+};
+
 export default function AddCategory() {
   const router = useRouter();
   const [createCategory] = useCreateCategoryMutation();
-  const [category, setCategory] = useState<Category>({ name: "" });
-  const [error, setError] = useState<string>("");
+  const [formState, setFormState] = useState<FormState>(initialState);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCategory({ name: e.target.value });
-    setError(""); // Clear error on input change
+    setFormState((prevState) => ({
+      ...prevState,
+      category: { name: e.target.value },
+      error: "", // Clear error on input change
+    }));
   };
 
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!category.name) {
-      setError("Category name is required");
+    // Client-side validation
+    if (!formState.category.name.trim()) {
+      setFormState((prevState) => ({
+        ...prevState,
+        error: "Category name is required",
+      }));
       return;
     }
 
-    try {
-      await createCategory({ name: category.name }).unwrap();
+    // Set submitting state
+    setFormState((prevState) => ({
+      ...prevState,
+      isSubmitting: true,
+    }));
 
+    try {
+      await createCategory({ name: formState.category.name }).unwrap();
       alert("Category created successfully!");
 
       setTimeout(() => {
@@ -40,7 +63,11 @@ export default function AddCategory() {
       }, 1000);
     } catch (err) {
       console.error("Failed to create category:", err);
-      setError("An error occurred while creating the category.");
+      setFormState((prevState) => ({
+        ...prevState,
+        error: "An error occurred while creating the category.",
+        isSubmitting: false,
+      }));
     }
   };
 
@@ -83,16 +110,24 @@ export default function AddCategory() {
               <Input
                 id="name"
                 name="name"
-                value={category.name}
+                value={formState.category.name}
                 onChange={handleChange}
                 placeholder="Enter category name"
+                disabled={formState.isSubmitting} // Disable input while submitting
               />
-              {error && <p className="text-red-500 text-sm">{error}</p>}
+              {formState.error && (
+                <p className="text-red-500 text-sm">{formState.error}</p>
+              )}
             </div>
 
             <div className="flex justify-end">
-              <Button type="submit" variant="default" size="lg">
-                Add Category
+              <Button
+                type="submit"
+                variant="default"
+                size="lg"
+                disabled={formState.isSubmitting} // Disable button while submitting
+              >
+                {formState.isSubmitting ? "Adding..." : "Add Category"}
               </Button>
             </div>
           </form>
