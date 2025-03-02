@@ -1,6 +1,6 @@
 "use client";
 
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { Provider } from "react-redux";
 import { store } from "@/store";
 import { CustomerSidebar } from "@/components/atoms/CustomerSidebar";

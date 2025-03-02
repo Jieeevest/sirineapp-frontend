@@ -75,28 +75,28 @@ export default function UpdateCategory() {
       <nav className="mb-4 text-sm text-gray-600">
         <ol className="list-none p-0 flex space-x-2">
           <li>
-            <a href="/dashboard" className="hover:text-blue-600">
+            <a href="/admin/dashboard" className="hover:text-blue-600">
               Dashboard
             </a>
           </li>
           <li>&gt;</li>
           <li>
-            <a href="/categories" className="hover:text-blue-600">
+            <a href="/admin/categories" className="hover:text-blue-600">
               Categories
             </a>
           </li>
           <li>&gt;</li>
-          <li className="font-semibold text-gray-800">Update Category</li>
+          <li className="font-semibold text-gray-800">Edit</li>
         </ol>
       </nav>
 
-      <h1 className="text-2xl font-semibold mb-4">Update Category</h1>
+      <h1 className="text-2xl font-semibold mb-4">Edit Information Category</h1>
 
       {/* Card Wrapper */}
       <Card className="w-full max-w-3xl">
         <CardHeader>
-          <p className="font-semibold border-b-2 border-gray-200 pb-4">
-            Update the category details below
+          <p className="border-b-2 border-gray-200 pb-4 text-sm text-gray-500">
+            Please fill in the form below to update the category.
           </p>
         </CardHeader>
         <CardContent>

@@ -29,6 +29,14 @@ import {
 } from "../../../services/api";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+} from "@/components/ui/pagination";
+import { formatDate } from "@/helpers";
+import { formatCurrency } from "@/helpers/formatCurrency";
 
 export default function Products() {
   const router = useRouter();
@@ -97,7 +105,7 @@ export default function Products() {
           <Button
             variant="default"
             size="lg"
-            className="h-10 gap-2 text-sm bg-blue-600 text-white hover:bg-blue-700"
+            className="h-10 gap-2 text-sm bg-gray-900 text-white hover:bg-gray-800"
             onClick={handleAddProduct}
           >
             <PlusCircle className="h-5 w-5" />
@@ -115,12 +123,12 @@ export default function Products() {
             placeholder="Search Products..."
             value={searchTerm}
             onChange={handleSearch}
-            className="p-3 border rounded-lg w-full"
+            className="p-3 rounded-lg w-full border-[1px] border-gray-300 mt-2 focus:outline-none focus:border-gray-800"
           />
         </div>
 
         {/* Data Table Card */}
-        <Card className="w-full">
+        <Card className="w-full shadow-sm border-[1px] border-gray-300">
           <CardHeader>
             <CardTitle>Products</CardTitle>
             <CardDescription>
@@ -140,7 +148,6 @@ export default function Products() {
                   <TableHead>Price</TableHead>
                   <TableHead>Stock</TableHead>
                   <TableHead>Created At</TableHead>
-                  <TableHead>Updated At</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -157,15 +164,14 @@ export default function Products() {
                       <TableCell className="hidden sm:table-cell">
                         {index + 1}
                       </TableCell>
-                      <TableCell>{"PRODUCT-" + product.id}</TableCell>
-                      <TableCell className="font-medium">
+                      <TableCell>{"PRODUCT-00" + product.id}</TableCell>
+                      <TableCell className="font-medium w-80">
                         {product.name}
                       </TableCell>
-                      <TableCell>{product.description}</TableCell>
-                      <TableCell>${product.price.toFixed(2)}</TableCell>
-                      <TableCell>{product.stock}</TableCell>
-                      <TableCell>{product.createdAt}</TableCell>
-                      <TableCell>{product.updatedAt}</TableCell>
+                      <TableCell>{product.description || "-"}</TableCell>
+                      <TableCell>{formatCurrency(product.price)}</TableCell>
+                      <TableCell>{product.stock || "0"}</TableCell>
+                      <TableCell>{formatDate(product.createdAt)}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -205,21 +211,20 @@ export default function Products() {
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="flex justify-center mt-4 space-x-2">
-            {Array.from({ length: totalPages }, (_, index) => (
-              <Button
-                key={index + 1}
-                onClick={() => handlePageChange(index + 1)}
-                className={`${
-                  currentPage === index + 1
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-800"
-                } px-4 py-2 rounded-md text-sm`}
-              >
-                {index + 1}
-              </Button>
-            ))}
-          </div>
+          <Pagination className="mt-4 cursor-pointer">
+            <PaginationContent>
+              {Array.from({ length: totalPages }, (_, index) => (
+                <PaginationItem key={index + 1}>
+                  <PaginationLink
+                    isActive={currentPage === index + 1}
+                    onClick={() => handlePageChange(index + 1)}
+                  >
+                    {index + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+            </PaginationContent>
+          </Pagination>
         )}
       </main>
     </div>

@@ -8,30 +8,51 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Register() {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [payload, setPayload] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [error, setError] = useState<{
+    fullName: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+  }>({
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [loading, setLoading] = useState(false);
+
+  const handleChange = (property: string, value: string) => {
+    setPayload((prev) => ({ ...prev, [property]: value }));
+    setError((prev) => ({ ...prev, [property]: "" }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {
+      fullName: payload.fullName ? "" : "Full name is required",
+      email: payload.email ? "" : "Email is required",
+      password: payload.password ? "" : "Password is required",
+      confirmPassword: payload.confirmPassword
+        ? ""
+        : "Confirm password is required",
+    };
+    setError(newErrors);
+    return Object.values(newErrors).every((error) => error === "");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-
-    // Validation
-    if (!name || !email || !password || !confirmPassword) {
-      setError("All fields are required");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
     setLoading(true);
 
+    if (!validateForm()) {
+      setLoading(false);
+      return;
+    }
     try {
       // Simulate registration
       alert("Registration successful!");
@@ -40,7 +61,6 @@ export default function Register() {
       }, 1000);
     } catch (err: any) {
       console.log(err);
-      setError("An error occurred during registration");
     } finally {
       setLoading(false);
     }
@@ -63,82 +83,76 @@ export default function Register() {
                 htmlFor="name"
                 className="text-sm font-medium text-gray-700"
               >
-                Full Name
+                Full Name<span className="text-red-500">*</span>
               </label>
               <Input
                 id="name"
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={payload.fullName}
+                onChange={(e) => handleChange("fullName", e.target.value)}
                 placeholder="Enter your full name"
-                required
-                className={`border-2 p-3 w-full rounded-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  error && !name ? "border-red-500" : "border-gray-300"
-                }`}
+                className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
               />
+              {error && (
+                <p className="text-red-500 text-sm">{error.fullName}</p>
+              )}
             </div>
             <div className="space-y-1">
               <label
                 htmlFor="email"
                 className="text-sm font-medium text-gray-700"
               >
-                Email Address
+                Email Address<span className="text-red-500">*</span>
               </label>
               <Input
                 id="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={payload.email}
+                onChange={(e) => handleChange("email", e.target.value)}
                 placeholder="Enter your email"
-                required
-                className={`border-2 p-3 w-full rounded-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  error && !email ? "border-red-500" : "border-gray-300"
-                }`}
+                className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
               />
+              {error && <p className="text-red-500 text-sm">{error.email}</p>}
             </div>
             <div className="space-y-1">
               <label
                 htmlFor="password"
                 className="text-sm font-medium text-gray-700"
               >
-                Password
+                Password<span className="text-red-500">*</span>
               </label>
               <Input
                 id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={payload.password}
+                onChange={(e) => handleChange("password", e.target.value)}
                 placeholder="Enter your password"
-                required
-                className={`border-2 p-3 w-full rounded-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  error && !password ? "border-red-500" : "border-gray-300"
-                }`}
+                className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
               />
+              {error && (
+                <p className="text-red-500 text-sm">{error.password}</p>
+              )}
             </div>
             <div className="space-y-1">
               <label
                 htmlFor="confirmPassword"
                 className="text-sm font-medium text-gray-700"
               >
-                Confirm Password
+                Confirm Password<span className="text-red-500">*</span>
               </label>
               <Input
                 id="confirmPassword"
                 type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                value={payload.confirmPassword}
+                onChange={(e) =>
+                  handleChange("confirmPassword", e.target.value)
+                }
                 placeholder="Confirm your password"
-                required
-                className={`border-2 p-3 w-full rounded-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  error && !confirmPassword
-                    ? "border-red-500"
-                    : "border-gray-300"
-                }`}
+                className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
               />
+              {error && (
+                <p className="text-red-500 text-sm">{error.confirmPassword}</p>
+              )}
             </div>
-            {error && (
-              <p className="text-red-500 text-sm text-center">{error}</p>
-            )}
             <div className="flex justify-center mt-4">
               <Button
                 type="submit"

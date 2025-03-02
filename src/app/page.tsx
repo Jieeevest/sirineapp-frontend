@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
@@ -10,6 +11,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { LogOut, ShoppingCart } from "lucide-react";
+import { useGetPublicCategoriesQuery } from "@/services/api";
+import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
+import { formatCurrency } from "@/helpers/formatCurrency";
 
 // Product type definition
 type Product = {
@@ -21,146 +36,55 @@ type Product = {
   quantity: number;
 };
 
-type ProductsByCategory = {
-  [key: string]: Product[];
+const user = {
+  accessToken: localStorage?.getItem("accessToken"),
+  name: localStorage?.getItem("userName"),
+  email: localStorage?.getItem("userEmail"),
+  role: localStorage?.getItem("userRoleName"),
+  avatar: "/avatars/shadcn.jpg",
 };
 
 export default function SirineSaleLanding() {
-  const categories = [
-    "Automotive Accessories",
-    "Electronics",
-    "Speakers",
-    "Strobes",
-    "Low Frequency",
-    "Sirens",
-  ];
+  const router = useRouter();
+  const [categories, setCategories] = useState<string[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
 
-  const products: ProductsByCategory = {
-    "Automotive Accessories": [
-      {
-        name: "LOW FREQ BASS GETAR REPLIKA FENIEX HAMMER SUPER KENCANG WATERPROOF AWET MOBIL DINAS",
-        price: "4.200.000",
-        image:
-          "https://images.tokopedia.net/img/cache/200-square/VqbcmM/2024/11/16/36c1845d-54df-4f92-84cd-01bd72936840.jpg",
-        quantity: 0,
-      },
-      {
-        name: "SIRINE WHELEN HHS3200 ORIGINAL SIREN HHS 3200 WHELEN PATWAL PEJABAT POLISI TNI KENDARAAN MOBIL DINAS SUPER KENCANG BRANDED",
-        price: "8.000.000",
-        image:
-          "https://images.tokopedia.net/img/cache/200-square/VqbcmM/2024/9/30/6e611fcc-fdb0-4df8-8d34-c923009294f3.jpg",
-        quantity: 0,
-      },
-      {
-        name: "LOW FREQ BASS GETAR SIRINE TOA KLAKSON MOBIL SENKEN SANKEN",
-        price: "3.830.000",
-        image:
-          "https://images.tokopedia.net/img/cache/200-square/VqbcmM/2024/7/22/dd63c407-c444-45cb-bd2f-960c633c9776.jpg",
-        quantity: 0,
-      },
-      {
-        name: "SPEAKER KECIL MINI YH340 KLAKSON SIRINE MOTOR MOBIL AMBULANCE PATWAL PENGAWALAN VVIP SUPER KENCANG",
-        price: "1.500.000",
-        image:
-          "https://images.tokopedia.net/img/cache/200-square/VqbcmM/2024/6/28/42868d42-063e-4e7f-a3f0-56ce810b0ad5.jpg",
-        quantity: 0,
-      },
-    ],
-    Electronics: [
-      {
-        name: "ROBOT VACUM PEL PENYAPU SAPU LANTAI RUMAH BERSIH DIRUMAH AJA ANTIVIRUS - Ungu",
-        price: "250.000",
-        image:
-          "https://images.tokopedia.net/img/cache/200-square/VqbcmM/2021/1/13/e4fa13ed-de13-47b4-953a-31c24d537099.jpg",
-        quantity: 0,
-      },
-      {
-        name: "KAMERA CAMERA ANALOG FUJIFILM ROLL FILM JADUL NEW FULLSET VINTAGE",
-        price: "110.000",
-        image:
-          "https://images.tokopedia.net/img/cache/200-square/VqbcmM/2021/9/11/a8c0e826-06db-4ff6-985e-ca035f219d6f.jpg",
-        quantity: 0,
-      },
-      {
-        name: "Toa 10 watt oval / Zh-610S",
-        price: "280.000",
-        image:
-          "https://images.tokopedia.net/img/cache/200-square/product-1/2018/10/5/1991856/1991856_64cb8174-b95c-4857-b6c3-454b2733ba67_720_1280.jpg",
-        quantity: 0,
-      },
-    ],
-    Speakers: [
-      {
-        name: "SPEAKER KECIL MINI YH340 KLAKSON SIRINE MOTOR MOBIL AMBULANCE PATWAL PENGAWALAN VVIP SUPER KENCANG",
-        price: "1.500.000",
-        image:
-          "https://images.tokopedia.net/img/cache/200-square/VqbcmM/2024/6/28/42868d42-063e-4e7f-a3f0-56ce810b0ad5.jpg",
-        quantity: 0,
-      },
-      {
-        name: "SPEAKER SIRINE KLAKSON MOBIL PATWAL REPLIKA WHELEN STS 340 M340 AMBULANCE DAMKAR RESCUE PENGAWALAN POLISI TNI",
-        price: "2.200.000",
-        image:
-          "https://images.tokopedia.net/img/cache/200-square/VqbcmM/2024/5/12/624b14da-5193-4732-89e6-e7b8eff773d8.jpg",
-        quantity: 0,
-      },
-    ],
-    Strobes: [
-      {
-        name: "STROBO DASHBOARD REPLIKA AVENGER WHELEN SUPER TERANG PABRIKAN GARANSI",
-        price: "1.200.000",
-        image:
-          "https://images.tokopedia.net/img/cache/200-square/VqbcmM/2024/3/28/d00d17dd-cfd1-440b-98cb-20a4c3df31dd.jpg",
-        quantity: 0,
-      },
-      {
-        name: "STICKBAR PABRIKAN H8 QUAD SUPER TERANG BUTA LIGHTBAR 1 SISI",
-        price: "3.900.000",
-        image:
-          "https://images.tokopedia.net/img/cache/200-square/VqbcmM/2024/1/1/97809393-cb16-47b8-a942-f5cdce693a62.jpg",
-        quantity: 0,
-      },
-    ],
-    "Low Frequency": [
-      {
-        name: "LOW FREQ BASS GETAR REPLIKA FENIEX HAMMER SUPER KENCANG WATERPROOF AWET MOBIL DINAS",
-        price: "4.200.000",
-        image:
-          "https://images.tokopedia.net/img/cache/200-square/VqbcmM/2024/11/16/36c1845d-54df-4f92-84cd-01bd72936840.jpg",
-        quantity: 0,
-      },
-      {
-        name: "LOW FREQ BASS GETAR SIRINE TOA KLAKSON MOBIL SENKEN SANKEN",
-        price: "3.830.000",
-        image:
-          "https://images.tokopedia.net/img/cache/200-square/VqbcmM/2024/7/22/dd63c407-c444-45cb-bd2f-960c633c9776.jpg",
-        quantity: 0,
-      },
-    ],
-    Sirens: [
-      {
-        name: "SIRINE WHELEN HHS3200 ORIGINAL SIREN HHS 3200 WHELEN PATWAL PEJABAT POLISI TNI KENDARAAN MOBIL DINAS SUPER KENCANG BRANDED",
-        price: "8.000.000",
-        image:
-          "https://images.tokopedia.net/img/cache/200-square/VqbcmM/2024/9/30/6e611fcc-fdb0-4df8-8d34-c923009294f3.jpg",
-        quantity: 0,
-      },
-      {
-        name: "SIRINE SIREN IC WHELEN HHS HANDLE KLAKSON MOBIL DINAS POLISI TNI DISHU",
-        price: "1.300.000",
-        image:
-          "https://images.tokopedia.net/img/cache/200-square/VqbcmM/2023/11/22/1eacbe0b-7548-4940-a8ed-ed3ecdd22ec3.jpg",
-        quantity: 0,
-      },
-    ],
-  };
+  const { data: categoriesData } = useGetPublicCategoriesQuery();
 
+  useEffect(() => {
+    if (categoriesData) {
+      setCategories(categoriesData.map((category) => category.name));
+      // Initialize an empty object to store the categorized products
+      const categorizedProducts: any = {};
+
+      // Loop through each category in the categoriesData
+      categoriesData.forEach((category: any) => {
+        // Initialize an empty array for each category, if it doesn't exist
+        if (!categorizedProducts[category.name]) {
+          categorizedProducts[category.name] = [];
+        }
+
+        // Loop through each product in the category and push it to the respective category array
+        category.products.forEach((product: any) => {
+          categorizedProducts[category.name].push({
+            name: product.name,
+            price: product.price,
+            image: "/vercel.svg",
+            quantity: product.stock,
+          });
+        });
+      });
+
+      // Set the categorized products state
+      setProducts(categorizedProducts);
+    }
+  }, [categoriesData]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     "Automotive Accessories"
   );
 
   const [cart, setCart] = useState<Product[]>([]);
-  const [isCartOpen, setIsCartOpen] = useState(false); // State to toggle modal visibility
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   const handleAddToCart = (product: Product) => {
     setCart((prevCart) => {
@@ -240,6 +164,35 @@ export default function SirineSaleLanding() {
     );
   };
 
+  const handleLogout = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will be logged out and all your data will be cleared.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, logout",
+      cancelButtonText: "Cancel",
+      reverseButtons: true,
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        localStorage.clear();
+
+        const result = await Swal.fire({
+          icon: "success",
+          title: "Logged out!",
+          text: "You have been successfully logged out.",
+          confirmButtonText: "OK",
+        });
+
+        if (result.isConfirmed) {
+          router.push("/auth/login");
+        }
+      } else if (result.isDismissed) {
+        console.log("Logout cancelled.");
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white text-gray-800 py-4">
@@ -260,19 +213,107 @@ export default function SirineSaleLanding() {
 
             <nav>
               <ul className="flex space-x-8">
-                <li>
-                  <a
-                    href="#sirens"
-                    className="hover:text-blue-400"
-                    style={{
-                      textShadow:
-                        "2px 2px 4px rgba(0, 0, 0, 0.3), 0 0 25px rgba(0, 0, 0, 0.3), 0 0 50px rgba(0, 0, 0, 0.3)",
-                      transition: "all 0.3s ease", // Smooth transition for hover
-                    }}
-                  >
-                    Sign In
-                  </a>
-                </li>
+                {/* Check if accessToken exists in localStorage */}
+                {user.accessToken ? (
+                  <>
+                    <li>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <div className="flex items-center space-x-2 cursor-pointer">
+                            <Avatar className="h-8 w-8 rounded-lg">
+                              <AvatarImage
+                                src={
+                                  localStorage.getItem("avatar") ||
+                                  "/avatars/shadcn.jpg"
+                                } // Fallback to a default avatar
+                                alt={localStorage.getItem("userName") || "User"}
+                              />
+                              <AvatarFallback className="rounded-lg">
+                                SA
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="grid flex-1 text-left text-sm leading-tight">
+                              <span className="truncate font-semibold">
+                                {user.name}
+                              </span>
+                              <span className="truncate text-xs">
+                                {user.email}
+                              </span>
+                            </div>
+                          </div>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                          side="bottom"
+                          align="end"
+                          sideOffset={4}
+                        >
+                          <DropdownMenuLabel className="p-0 font-normal">
+                            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                              <Avatar className="h-8 w-8 rounded-lg">
+                                <AvatarImage
+                                  src={user.avatar}
+                                  alt={user.name || "User"}
+                                />
+                                <AvatarFallback className="rounded-lg">
+                                  SA
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="grid flex-1 text-left text-sm leading-tight">
+                                <span className="truncate font-semibold">
+                                  {user.name}
+                                </span>
+                                <span className="truncate text-xs">
+                                  {user.email}
+                                </span>
+                              </div>
+                            </div>
+                          </DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={handleLogout}
+                            className="cursor-pointer"
+                          >
+                            <LogOut />
+                            Log out
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </li>
+                    <li>
+                      <div
+                        role="button"
+                        onClick={() => setIsCartOpen(true)}
+                        className="relative flex items-center space-x-2 hover:text-gray-700 hover:bg-gray-200 rounded-full p-2 transition-all duration-300"
+                      >
+                        <ShoppingCart size={24} />
+                        {/* Cart item count indicator */}
+                        {cart.length ? (
+                          <span className="absolute top-0 right-0 rounded-full bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center -mt-2 -mr-2">
+                            {cart.length}
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                      </div>
+                    </li>
+                  </>
+                ) : (
+                  // If no accessToken, show Sign In link
+                  <li>
+                    <a
+                      href="/auth/login"
+                      className="hover:text-blue-400"
+                      style={{
+                        textShadow:
+                          "2px 2px 4px rgba(0, 0, 0, 0.3), 0 0 25px rgba(0, 0, 0, 0.3), 0 0 50px rgba(0, 0, 0, 0.3)",
+                        transition: "all 0.3s ease",
+                      }}
+                    >
+                      Sign In
+                    </a>
+                  </li>
+                )}
               </ul>
             </nav>
           </div>
@@ -305,7 +346,7 @@ export default function SirineSaleLanding() {
           </p>
         </div>
       </section>
-      <section className="py-8 px-6 bg-gray-100">
+      {/* <section className="py-8 px-6 bg-gray-100">
         <Container>
           <div className="flex justify-between items-center gap-4">
             <div>
@@ -327,7 +368,7 @@ export default function SirineSaleLanding() {
             </Button>
           </div>
         </Container>
-      </section>
+      </section> */}
 
       {/* Categories Section */}
       <section className="py-6 px-6">
@@ -360,12 +401,21 @@ export default function SirineSaleLanding() {
               </h2>
             </div>
             {products[selectedCategory]?.length === 0 ? (
-              <p className="text-center text-gray-500">
-                No products available in this category.
-              </p>
+              <div className="flex justify-center items-center">
+                <Image
+                  src="https://i.pinimg.com/736x/39/2a/26/392a261b73dbcd361a0dac2e93a05284.jpg"
+                  alt="No products available"
+                  width={300}
+                  height={300}
+                  className="w-full h-64 object-cover"
+                />
+                <p className="text-center text-gray-500 font-semibold text-xl">
+                  No products available in this category.
+                </p>
+              </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {products[selectedCategory]?.map((item, index) => (
+                {products[selectedCategory]?.map((item: any, index: any) => (
                   <Card
                     key={index}
                     className={`bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-all hover:scale-105 hover:shadow-black/20 ease-in-out border-[1px] border-gray-300 hover:cursor-pointer`}
@@ -388,7 +438,9 @@ export default function SirineSaleLanding() {
 
                     <CardContent className="p-4">
                       <p className="text-gray-700 text-lg font-bold">
-                        <span className="mr-2">Rp{item.price},-</span>
+                        <span className="mr-2">
+                          {formatCurrency(item.price)}
+                        </span>
                       </p>
                       <Button
                         className="mt-4 w-full bg-gray-800 hover:bg-gray-900 hover:scale-105 text-white"

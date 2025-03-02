@@ -29,6 +29,13 @@ import {
 } from "../../../services/api"; // Import RTK Query hooks
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { formatDate } from "@/helpers";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+} from "@/components/ui/pagination";
 
 export default function Categories() {
   const router = useRouter();
@@ -104,7 +111,7 @@ export default function Categories() {
           <Button
             variant="default"
             size="lg"
-            className="h-10 gap-2 text-sm bg-blue-600 text-white hover:bg-blue-700"
+            className="h-10 gap-2 text-sm bg-gray-900 text-white hover:bg-gray-800"
             onClick={handleAdd}
           >
             <PlusCircle className="h-5 w-5" />
@@ -122,16 +129,14 @@ export default function Categories() {
             placeholder="Search Categories..."
             value={searchTerm}
             onChange={handleSearch}
-            className="p-3 border rounded-lg w-full"
+            className="p-3 rounded-lg w-full border-[1px] border-gray-300 mt-2 focus:outline-none focus:border-gray-800"
           />
         </div>
 
         {/* Data Table Card */}
-        <Card className="w-full shadow-md rounded-xl bg-white">
+        <Card className="w-full shadow-sm border-[1px] border-gray-300">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold text-gray-800">
-              Categories
-            </CardTitle>
+            <CardTitle>Categories</CardTitle>
             <CardDescription className="text-gray-500">
               Manage and view categories and their details here.
             </CardDescription>
@@ -172,12 +177,12 @@ export default function Categories() {
                       className="hover:bg-gray-100 transition duration-300"
                     >
                       <TableCell className="hidden sm:table-cell">
-                        {index + 1}
+                        {itemsPerPage * (currentPage - 1) + index + 1}
                       </TableCell>
                       <TableCell className="font-medium">{`CATEGORY-00${category.id}`}</TableCell>
                       <TableCell>{category.name}</TableCell>
-                      <TableCell>{category.createdAt}</TableCell>
-                      <TableCell>{category.updatedAt}</TableCell>
+                      <TableCell>{formatDate(category.createdAt)}</TableCell>
+                      <TableCell>{formatDate(category.updatedAt)}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -218,21 +223,20 @@ export default function Categories() {
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="flex justify-center mt-4 space-x-2">
-            {Array.from({ length: totalPages }, (_, index) => (
-              <Button
-                key={index + 1}
-                onClick={() => handlePageChange(index + 1)}
-                className={`${
-                  currentPage === index + 1
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-800"
-                } px-4 py-2 rounded-md text-sm`}
-              >
-                {index + 1}
-              </Button>
-            ))}
-          </div>
+          <Pagination className="mt-4 cursor-pointer">
+            <PaginationContent>
+              {Array.from({ length: totalPages }, (_, index) => (
+                <PaginationItem key={index + 1}>
+                  <PaginationLink
+                    isActive={currentPage === index + 1}
+                    onClick={() => handlePageChange(index + 1)}
+                  >
+                    {index + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+            </PaginationContent>
+          </Pagination>
         )}
       </main>
     </div>

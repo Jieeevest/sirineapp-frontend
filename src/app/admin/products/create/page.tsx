@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"; // ShadCN UI
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // ShadCN UI
+import { Card, CardContent, CardHeader } from "@/components/ui/card"; // ShadCN UI
 import { useCreateProductMutation } from "../../../../services/api"; // RTK Query mutation
+import Swal from "sweetalert2";
 
 // Define types for product
 interface Product {
@@ -58,8 +59,22 @@ export default function AddProduct() {
     };
 
     try {
-      await createProduct(newProduct).unwrap();
-      router.push("/products"); // Redirect to Products page after creation
+      await createProduct(newProduct)
+        .unwrap()
+        .then(async () => {
+          // Display the success alert and wait for the user to click "OK"
+          const result = await Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "Add Product successfully!",
+            confirmButtonText: "OK",
+          });
+
+          // Redirect only if the user confirms the alert
+          if (result.isConfirmed) {
+            router.push("/admin/products");
+          }
+        });
     } catch (error) {
       console.error("Failed to add product:", error);
     }
@@ -71,18 +86,18 @@ export default function AddProduct() {
       <nav className="mb-10 text-sm text-gray-600">
         <ol className="list-none p-0 flex space-x-2">
           <li>
-            <a href="/dashboard" className="hover:text-blue-600">
+            <a href="/admin/dashboard" className="hover:font-semibold">
               Dashboard
             </a>
           </li>
           <li>&gt;</li>
           <li>
-            <a href="/products" className="hover:text-blue-600">
+            <a href="/admin/products" className="hover:font=semibold">
               Products
             </a>
           </li>
           <li>&gt;</li>
-          <li className="font-semibold text-gray-800">Add New Product</li>
+          <li className="font-semibold text-gray-800">Add</li>
         </ol>
       </nav>
 
@@ -91,8 +106,8 @@ export default function AddProduct() {
       {/* Card Wrapper */}
       <Card className="w-full max-w-3xl">
         <CardHeader>
-          <p className="font-semibold border-b-2 border-gray-200 pb-4">
-            Fill the form below to add a new product
+          <p className="border-b-2 border-gray-200 pb-4 text-sm text-gray-500">
+            Please fill in the form below to add the product.
           </p>
         </CardHeader>
         <CardContent>
@@ -101,12 +116,13 @@ export default function AddProduct() {
               <label htmlFor="name" className="text-sm font-medium">
                 Product Name
               </label>
-              <Input
+              <Textarea
                 id="name"
                 name="name"
                 value={product.name}
                 onChange={handleChange}
                 placeholder="Enter product name"
+                rows={4}
               />
               {errors.name && (
                 <p className="text-red-500 text-sm">{errors.name}</p>
@@ -123,6 +139,7 @@ export default function AddProduct() {
                 value={product.description}
                 onChange={handleChange}
                 placeholder="Enter product description"
+                rows={4}
               />
               {errors.description && (
                 <p className="text-red-500 text-sm">{errors.description}</p>

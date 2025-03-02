@@ -107,6 +107,15 @@ export const api = createApi({
     },
   }),
   endpoints: (builder) => ({
+    // public Endpoints
+    getPublicProducts: builder.query<Product[], void>({
+      query: () => "/public/catalogs",
+      transformResponse: (response: ApiResponse<Product[]>) => response.data,
+    }),
+    getPublicCategories: builder.query<Category[], void>({
+      query: () => "/public/categories",
+      transformResponse: (response: ApiResponse<Category[]>) => response.data,
+    }),
     // Produk Endpoints
     getProducts: builder.query<Product[], void>({
       query: () => "/products",
@@ -362,6 +371,8 @@ export const api = createApi({
 });
 
 export const {
+  useGetPublicProductsQuery,
+  useGetPublicCategoriesQuery,
   useGetProductsQuery,
   useGetProductByIdQuery,
   useCreateProductMutation,

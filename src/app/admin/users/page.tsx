@@ -26,6 +26,13 @@ import {
 import { useGetUsersQuery, useDeleteUserMutation } from "../../../services/api";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+} from "@/components/ui/pagination";
+import { formatDate } from "@/helpers";
 
 export default function Users() {
   const router = useRouter();
@@ -91,7 +98,7 @@ export default function Users() {
           <Button
             variant="default"
             size="lg"
-            className="h-10 gap-2 text-sm bg-blue-600 text-white hover:bg-blue-700"
+            className="h-10 gap-2 text-sm bg-gray-900 text-white hover:bg-gray-800"
             onClick={handleAddUser}
           >
             <PlusCircle className="h-5 w-5" />
@@ -109,7 +116,7 @@ export default function Users() {
             placeholder="Search Users..."
             value={searchTerm}
             onChange={handleSearch}
-            className="p-3 border rounded-lg w-full"
+            className="p-3 rounded-lg w-full border-[1px] border-gray-300 mt-2 focus:outline-none focus:border-gray-800"
           />
         </div>
 
@@ -152,8 +159,8 @@ export default function Users() {
                       <TableCell>USER-00{user.id}</TableCell>
                       <TableCell className="font-medium">{user.name}</TableCell>
                       <TableCell>{user.email}</TableCell>
-                      <TableCell>{user.createdAt}</TableCell>
-                      <TableCell>{user.updatedAt}</TableCell>
+                      <TableCell>{formatDate(user.createdAt)}</TableCell>
+                      <TableCell>{formatDate(user.updatedAt)}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -193,21 +200,20 @@ export default function Users() {
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="flex justify-center mt-4 space-x-2">
-            {Array.from({ length: totalPages }, (_, index) => (
-              <Button
-                key={index + 1}
-                onClick={() => handlePageChange(index + 1)}
-                className={`${
-                  currentPage === index + 1
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-800"
-                } px-4 py-2 rounded-md text-sm`}
-              >
-                {index + 1}
-              </Button>
-            ))}
-          </div>
+          <Pagination className="mt-4 cursor-pointer">
+            <PaginationContent>
+              {Array.from({ length: totalPages }, (_, index) => (
+                <PaginationItem key={index + 1}>
+                  <PaginationLink
+                    isActive={currentPage === index + 1}
+                    onClick={() => handlePageChange(index + 1)}
+                  >
+                    {index + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+            </PaginationContent>
+          </Pagination>
         )}
       </main>
     </div>

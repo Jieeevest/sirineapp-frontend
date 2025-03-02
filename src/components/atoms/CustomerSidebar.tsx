@@ -13,15 +13,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-import {
-  Home,
-  Box,
-  ShoppingCart,
-  Tag,
-  User,
-  Users,
-  FileText,
-} from "lucide-react";
+import { Home, ShoppingCart, FileText } from "lucide-react";
 import { NavUser } from "./NavUser";
 
 const prefix = "/customer";

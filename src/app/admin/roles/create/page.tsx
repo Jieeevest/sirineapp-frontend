@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"; // ShadCN UI
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // ShadCN UI
+import { Card, CardContent, CardHeader } from "@/components/ui/card"; // ShadCN UI
 import { useCreateRoleMutation } from "../../../../services/api"; // RTK Query hooks
 
 // Define the type for the role

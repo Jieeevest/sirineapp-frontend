@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"; // ShadCN UI
 import { Card, CardContent, CardHeader } from "@/components/ui/card"; // ShadCN UI
 import { useCreateCategoryMutation } from "../../../../services/api"; // RTK Query hooks
-
+import Swal from "sweetalert2";
 // Define the type for Category
 interface Category {
   name: string;
@@ -55,12 +55,22 @@ export default function AddCategory() {
     }));
 
     try {
-      await createCategory({ name: formState.category.name }).unwrap();
-      alert("Category created successfully!");
+      await createCategory({ name: formState.category.name })
+        .unwrap()
+        .then(async () => {
+          // Display the success alert and wait for the user to click "OK"
+          const result = await Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "Add Category successfully!",
+            confirmButtonText: "OK",
+          });
 
-      setTimeout(() => {
-        router.push("/admin/categories");
-      }, 1000);
+          // Redirect only if the user confirms the alert
+          if (result.isConfirmed) {
+            router.push("/admin/categories");
+          }
+        });
     } catch (err) {
       console.error("Failed to create category:", err);
       setFormState((prevState) => ({
@@ -77,18 +87,18 @@ export default function AddCategory() {
       <nav className="mb-4 text-sm text-gray-600">
         <ol className="list-none p-0 flex space-x-2">
           <li>
-            <a href="/dashboard" className="hover:text-blue-600">
+            <a href="/admin/dashboard" className="hover:font-semibold">
               Dashboard
             </a>
           </li>
           <li>&gt;</li>
           <li>
-            <a href="/categories" className="hover:text-blue-600">
+            <a href="/admin/categories" className="hover:font-semibold">
               Categories
             </a>
           </li>
           <li>&gt;</li>
-          <li className="font-semibold text-gray-800">Add Category</li>
+          <li className="font-semibold text-gray-800">Add</li>
         </ol>
       </nav>
 
@@ -97,8 +107,8 @@ export default function AddCategory() {
       {/* Card Wrapper */}
       <Card className="w-full max-w-3xl">
         <CardHeader>
-          <p className="font-semibold border-b-2 border-gray-200 pb-4">
-            Add a new category
+          <p className="border-b-2 border-gray-200 pb-4 text-sm text-gray-500">
+            Please fill in the form below to add the category.
           </p>
         </CardHeader>
         <CardContent>

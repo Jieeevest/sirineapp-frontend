@@ -26,6 +26,13 @@ import {
 import { useGetRolesQuery, useDeleteRoleMutation } from "../../../services/api";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+} from "@/components/ui/pagination";
+import { formatDate } from "@/helpers";
 
 export default function Roles() {
   const router = useRouter();
@@ -91,7 +98,7 @@ export default function Roles() {
           <Button
             variant="default"
             size="lg"
-            className="h-10 gap-2 text-sm bg-blue-600 text-white hover:bg-blue-700"
+            className="h-10 gap-2 text-sm bg-gray-900 text-white hover:bg-gray-800"
             onClick={handleAddRole}
           >
             <PlusCircle className="h-5 w-5" />
@@ -109,12 +116,12 @@ export default function Roles() {
             placeholder="Search Roles..."
             value={searchTerm}
             onChange={handleSearch}
-            className="p-3 border rounded-lg w-full"
+            className="p-3 rounded-lg w-full border-[1px] border-gray-300 mt-2 focus:outline-none focus:border-gray-800"
           />
         </div>
 
         {/* Data Table Card */}
-        <Card className="w-full">
+        <Card className="w-full shadow-sm border-[1px] border-gray-300 rounded-xl bg-white">
           <CardHeader>
             <CardTitle>Roles</CardTitle>
             <CardDescription>
@@ -150,8 +157,8 @@ export default function Roles() {
                       </TableCell>
                       <TableCell>ROLE-00{role.id}</TableCell>
                       <TableCell className="font-medium">{role.name}</TableCell>
-                      <TableCell>{role.createdAt}</TableCell>
-                      <TableCell>{role.updatedAt}</TableCell>
+                      <TableCell>{formatDate(role.createdAt)}</TableCell>
+                      <TableCell>{formatDate(role.updatedAt)}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -191,21 +198,20 @@ export default function Roles() {
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="flex justify-center mt-4 space-x-2">
-            {Array.from({ length: totalPages }, (_, index) => (
-              <Button
-                key={index + 1}
-                onClick={() => handlePageChange(index + 1)}
-                className={`${
-                  currentPage === index + 1
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-800"
-                } px-4 py-2 rounded-md text-sm`}
-              >
-                {index + 1}
-              </Button>
-            ))}
-          </div>
+          <Pagination className="mt-4 cursor-pointer">
+            <PaginationContent>
+              {Array.from({ length: totalPages }, (_, index) => (
+                <PaginationItem key={index + 1}>
+                  <PaginationLink
+                    isActive={currentPage === index + 1}
+                    onClick={() => handlePageChange(index + 1)}
+                  >
+                    {index + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+            </PaginationContent>
+          </Pagination>
         )}
       </main>
     </div>
