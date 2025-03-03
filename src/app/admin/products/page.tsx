@@ -162,7 +162,7 @@ export default function Products() {
                   currentProducts?.map((product, index) => (
                     <TableRow key={product.id}>
                       <TableCell className="hidden sm:table-cell">
-                        {index + 1}
+                        {itemsPerPage * (currentPage - 1) + index + 1}
                       </TableCell>
                       <TableCell>{"PRODUCT-00" + product.id}</TableCell>
                       <TableCell className="font-medium w-80">

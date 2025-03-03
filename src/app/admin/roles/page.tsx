@@ -153,7 +153,7 @@ export default function Roles() {
                   currentRoles?.map((role, index) => (
                     <TableRow key={role.id}>
                       <TableCell className="hidden sm:table-cell">
-                        {index + 1}
+                        {itemsPerPage * (currentPage - 1) + index + 1}
                       </TableCell>
                       <TableCell>ROLE-00{role.id}</TableCell>
                       <TableCell className="font-medium">{role.name}</TableCell>

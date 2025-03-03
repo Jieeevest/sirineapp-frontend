@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // services/api.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { Role } from "./api";
@@ -34,6 +35,27 @@ export const authApi = createApi({
     login: builder.mutation<LoginResponse, LoginRequest>({
       query: (credentials) => ({
         url: "/auth", // Sesuaikan dengan endpoint login Anda
+        method: "POST",
+        body: credentials,
+      }),
+    }),
+    register: builder.mutation<any, any>({
+      query: (credentials) => ({
+        url: "/auth/register",
+        method: "POST",
+        body: credentials,
+      }),
+    }),
+    forgotPassword: builder.mutation<any, any>({
+      query: (credentials) => ({
+        url: "/auth/forgot-password",
+        method: "POST",
+        body: credentials,
+      }),
+    }),
+    resetPassword: builder.mutation<any, any>({
+      query: (credentials) => ({
+        url: "/auth/reset-password",
         method: "POST",
         body: credentials,
       }),

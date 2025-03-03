@@ -138,6 +138,7 @@ export default function Users() {
                   <TableHead className="w-[100px]">User ID</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Role Name</TableHead>
                   <TableHead>Created At</TableHead>
                   <TableHead>Updated At</TableHead>
                   <TableHead>Actions</TableHead>
@@ -154,11 +155,14 @@ export default function Users() {
                   currentUsers?.map((user, index) => (
                     <TableRow key={user.id}>
                       <TableCell className="hidden sm:table-cell">
-                        {index + 1}
+                        {itemsPerPage * (currentPage - 1) + index + 1}
                       </TableCell>
                       <TableCell>USER-00{user.id}</TableCell>
-                      <TableCell className="font-medium">{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
+                      <TableCell className="font-medium">
+                        {user.name || "-"}
+                      </TableCell>
+                      <TableCell>{user.email || "-"}</TableCell>
+                      <TableCell>{user?.roles?.name || "-"}</TableCell>
                       <TableCell>{formatDate(user.createdAt)}</TableCell>
                       <TableCell>{formatDate(user.updatedAt)}</TableCell>
                       <TableCell>

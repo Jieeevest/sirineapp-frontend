@@ -62,6 +62,7 @@ interface User {
   name: string;
   email: string;
   roleId: number;
+  roles: Role;
   createdAt: string;
   updatedAt: string;
 }
