@@ -1,15 +1,15 @@
 "use client";
+import Swal from "sweetalert2";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // ShadCN UI
-import { Card, CardContent, CardHeader } from "@/components/ui/card"; // ShadCN UI
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   useGetRoleByIdQuery,
   useUpdateRoleMutation,
-} from "../../../../../services/api"; // RTK Query hooks
+} from "../../../../../services/api";
 
-// Define the type for the role
 interface Role {
   id: number;
   name: string;
@@ -35,7 +35,7 @@ export default function UpdateRole() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRole({ ...role, name: e.target.value });
-    setRoleError(""); // Clear error on input change
+    setRoleError("");
   };
 
   const handleUpdateRole = async (e: React.FormEvent) => {
@@ -50,11 +50,19 @@ export default function UpdateRole() {
       await updateRole({
         id: role.id,
         updatedRole: { name: role.name },
-      }).unwrap();
-      alert("Role updated successfully!");
-      setTimeout(() => {
-        router.push("/admin/roles");
-      }, 1000);
+      })
+        .unwrap()
+        .then(async () => {
+          const result = await Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "Role updated successfully!",
+            confirmButtonText: "OK",
+          });
+          if (result.isConfirmed) {
+            router.push("/admin/roles");
+          }
+        });
     } catch (err) {
       console.error("Failed to update role:", err);
       setRoleError("An error occurred while updating the role.");

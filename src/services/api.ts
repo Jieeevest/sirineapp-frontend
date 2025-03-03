@@ -258,7 +258,13 @@ export const api = createApi({
       query: (id) => `/orders/${id}`,
       transformResponse: (response: ApiResponse<Order>) => response.data,
     }),
-    createOrder: builder.mutation<Order, Partial<Order>>({
+    createOrder: builder.mutation<
+      Order,
+      {
+        userEmail: string;
+        cart: { productId: number; quantity: number; price: string }[];
+      }
+    >({
       query: (newOrder) => ({
         url: "/orders",
         method: "POST",

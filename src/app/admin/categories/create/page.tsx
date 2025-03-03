@@ -1,12 +1,11 @@
 "use client";
+import Swal from "sweetalert2";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // ShadCN UI
-import { Card, CardContent, CardHeader } from "@/components/ui/card"; // ShadCN UI
-import { useCreateCategoryMutation } from "../../../../services/api"; // RTK Query hooks
-import Swal from "sweetalert2";
-// Define the type for Category
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useCreateCategoryMutation } from "../../../../services/api";
 interface Category {
   name: string;
 }
@@ -32,14 +31,13 @@ export default function AddCategory() {
     setFormState((prevState) => ({
       ...prevState,
       category: { name: e.target.value },
-      error: "", // Clear error on input change
+      error: "",
     }));
   };
 
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Client-side validation
     if (!formState.category.name.trim()) {
       setFormState((prevState) => ({
         ...prevState,
@@ -48,7 +46,6 @@ export default function AddCategory() {
       return;
     }
 
-    // Set submitting state
     setFormState((prevState) => ({
       ...prevState,
       isSubmitting: true,
@@ -58,7 +55,6 @@ export default function AddCategory() {
       await createCategory({ name: formState.category.name })
         .unwrap()
         .then(async () => {
-          // Display the success alert and wait for the user to click "OK"
           const result = await Swal.fire({
             icon: "success",
             title: "Success!",
@@ -66,7 +62,6 @@ export default function AddCategory() {
             confirmButtonText: "OK",
           });
 
-          // Redirect only if the user confirms the alert
           if (result.isConfirmed) {
             router.push("/admin/categories");
           }

@@ -1,15 +1,15 @@
 "use client";
+import Swal from "sweetalert2";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // ShadCN UI
-import { Card, CardContent, CardHeader } from "@/components/ui/card"; // ShadCN UI
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   useGetCategoryByIdQuery,
   useUpdateCategoryMutation,
-} from "../../../../../services/api"; // RTK Query hooks
+} from "../../../../../services/api";
 
-// Define the type for Category
 interface Category {
   id: number;
   name: string;
@@ -17,7 +17,7 @@ interface Category {
 
 export default function UpdateCategory() {
   const router = useRouter();
-  const { id } = useParams(); // Assuming dynamic routing
+  const { id } = useParams();
   const [updateCategory] = useUpdateCategoryMutation();
   const {
     data: categoryData,
@@ -39,7 +39,7 @@ export default function UpdateCategory() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCategory({ ...category, name: e.target.value });
-    setCategoryError(""); // Clear error on input change
+    setCategoryError("");
   };
 
   const handleUpdateCategory = async (e: React.FormEvent) => {
@@ -54,12 +54,20 @@ export default function UpdateCategory() {
       await updateCategory({
         id: category.id,
         updatedCategory: { name: category.name },
-      }).unwrap();
-      alert("Category updated successfully!");
+      })
+        .unwrap()
+        .then(async () => {
+          const result = await Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "Add Category successfully!",
+            confirmButtonText: "OK",
+          });
 
-      setTimeout(() => {
-        router.push("/admin/categories");
-      }, 1000);
+          if (result.isConfirmed) {
+            router.push("/admin/categories");
+          }
+        });
     } catch (err) {
       console.error("Failed to update category:", err);
       setCategoryError("An error occurred while updating the category.");

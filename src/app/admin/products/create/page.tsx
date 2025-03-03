@@ -66,7 +66,7 @@ export default function AddProduct() {
           const result = await Swal.fire({
             icon: "success",
             title: "Success!",
-            text: "Add Product successfully!",
+            text: "Product added successfully!",
             confirmButtonText: "OK",
           });
 

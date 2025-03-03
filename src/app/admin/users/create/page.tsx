@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -51,8 +52,19 @@ export default function AddUser() {
     }
 
     try {
-      await createUser(user).unwrap();
-      router.push("/users"); // Redirect to Users page after adding the user
+      await createUser(user)
+        .unwrap()
+        .then(async () => {
+          const result = await Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "User added successfully!",
+            confirmButtonText: "OK",
+          });
+          if (result.isConfirmed) {
+            router.push("/admin/users");
+          }
+        });
     } catch (err) {
       console.error("Failed to create user:", err);
       setError("An error occurred while creating the user.");

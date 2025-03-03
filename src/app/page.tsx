@@ -21,13 +21,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogOut, ShoppingCart } from "lucide-react";
-import { useGetPublicCategoriesQuery } from "@/services/api";
+import {
+  useCreateOrderMutation,
+  useGetPublicCategoriesQuery,
+} from "@/services/api";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/helpers/formatCurrency";
 
 // Product type definition
 type Product = {
+  id: number;
   name: string;
   price: string;
   image: string;
@@ -50,6 +54,7 @@ export default function SirineSaleLanding() {
   const [products, setProducts] = useState<any[]>([]);
 
   const { data: categoriesData } = useGetPublicCategoriesQuery();
+  const [createOrder] = useCreateOrderMutation();
 
   useEffect(() => {
     if (categoriesData) {
@@ -67,8 +72,9 @@ export default function SirineSaleLanding() {
         // Loop through each product in the category and push it to the respective category array
         category.products.forEach((product: any) => {
           categorizedProducts[category.name].push({
+            id: product.id,
             name: product.name,
-            price: product.price,
+            price: String(product.price),
             image: "/vercel.svg",
             quantity: product.stock,
           });
@@ -85,6 +91,34 @@ export default function SirineSaleLanding() {
 
   const [cart, setCart] = useState<Product[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (cart.length === 0) {
+      console.log("Your cart is empty.");
+      return;
+    }
+
+    try {
+      await createOrder({
+        userEmail: String(user.email),
+        cart: cart.map((item) => ({
+          productId: item.id,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+      }).unwrap();
+
+      alert("Order placed successfully!");
+      setTimeout(() => {
+        router.push("/orders"); // Redirect ke halaman daftar pesanan
+      }, 1000);
+    } catch (err) {
+      console.error("Failed to place order:", err);
+      console.error("An error occurred while placing the order.");
+    }
+  };
 
   const handleAddToCart = (product: Product) => {
     setCart((prevCart) => {
@@ -159,7 +193,8 @@ export default function SirineSaleLanding() {
   const calculateTotal = () => {
     return cart.reduce(
       (total, item) =>
-        total + parseInt(item.price.replace(/\./g, "")) * item.quantity, // Multiply price by quantity
+        total +
+        parseInt(String(item?.price?.replace(/\./g, ""))) * item.quantity, // Multiply price by quantity
       0
     );
   };
@@ -402,13 +437,6 @@ export default function SirineSaleLanding() {
             </div>
             {products[selectedCategory]?.length === 0 ? (
               <div className="flex justify-center items-center">
-                <Image
-                  src="https://i.pinimg.com/736x/39/2a/26/392a261b73dbcd361a0dac2e93a05284.jpg"
-                  alt="No products available"
-                  width={300}
-                  height={300}
-                  className="w-full h-64 object-cover"
-                />
                 <p className="text-center text-gray-500 font-semibold text-xl">
                   No products available in this category.
                 </p>
@@ -442,12 +470,14 @@ export default function SirineSaleLanding() {
                           {formatCurrency(item.price)}
                         </span>
                       </p>
-                      <Button
-                        className="mt-4 w-full bg-gray-800 hover:bg-gray-900 hover:scale-105 text-white"
-                        onClick={() => handleAddToCart(item)}
-                      >
-                        Add to Cart
-                      </Button>
+                      {user.accessToken && (
+                        <Button
+                          className="mt-4 w-full bg-gray-800 hover:bg-gray-900 hover:scale-105 text-white"
+                          onClick={() => handleAddToCart(item)}
+                        >
+                          Add to Cart
+                        </Button>
+                      )}
                     </CardContent>
                   </Card>
                 ))}
@@ -506,7 +536,12 @@ export default function SirineSaleLanding() {
                 <p className="text-lg font-bold">
                   Total: Rp.{calculateTotal().toLocaleString()}
                 </p>
-                <Button className="bg-green-600 text-white">Checkout</Button>
+                <Button
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  onClick={handleSubmit}
+                >
+                  Checkout
+                </Button>
               </div>
             </div>
           ) : (

@@ -114,26 +114,29 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {/* Master Data Group */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Master Data</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {masterDataItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a
-                      href={item.url}
-                      className="flex items-center space-x-2 text-gray-700 hover:text-gray-900"
-                    >
-                      <item.icon className="h-5 w-5 text-gray-500" />
-                      <p className="text-base">{item.title}</p>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {user.role == "Admin" ||
+          (user.role == "Super Admin" && (
+            <SidebarGroup>
+              <SidebarGroupLabel>Master Data</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {masterDataItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <a
+                          href={item.url}
+                          className="flex items-center space-x-2 text-gray-700 hover:text-gray-900"
+                        >
+                          <item.icon className="h-5 w-5 text-gray-500" />
+                          <p className="text-base">{item.title}</p>
+                        </a>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ))}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

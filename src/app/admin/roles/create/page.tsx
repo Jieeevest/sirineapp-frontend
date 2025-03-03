@@ -1,12 +1,12 @@
 "use client";
+import Swal from "sweetalert2";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // ShadCN UI
-import { Card, CardContent, CardHeader } from "@/components/ui/card"; // ShadCN UI
-import { useCreateRoleMutation } from "../../../../services/api"; // RTK Query hooks
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useCreateRoleMutation } from "../../../../services/api";
 
-// Define the type for the role
 interface Role {
   name: string;
 }
@@ -31,12 +31,19 @@ export default function AddRole() {
     }
 
     try {
-      await createRole({ name: role.name }).unwrap();
-
-      alert("Role created successfully!");
-      setTimeout(() => {
-        router.push("/admin/roles");
-      }, 1000);
+      await createRole({ name: role.name })
+        .unwrap()
+        .then(async () => {
+          const result = await Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "Role added successfully!",
+            confirmButtonText: "OK",
+          });
+          if (result.isConfirmed) {
+            router.push("/admin/roles");
+          }
+        });
     } catch (err) {
       console.error("Failed to create role:", err);
       setError("An error occurred while creating the role.");

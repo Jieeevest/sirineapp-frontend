@@ -1,15 +1,15 @@
 "use client";
+import Swal from "sweetalert2";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // ShadCN UI
-import { Card, CardContent, CardHeader } from "@/components/ui/card"; // ShadCN UI
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   useGetUserByIdQuery,
   useUpdateUserMutation,
-} from "../../../../../services/api"; // RTK Query hooks
+} from "../../../../../services/api";
 
-// Define the type for User
 interface User {
   id: number;
   name: string;
@@ -19,7 +19,7 @@ interface User {
 
 export default function UpdateUser() {
   const router = useRouter();
-  const { id } = useParams(); // Assuming dynamic routing
+  const { id } = useParams();
   const [updateUser] = useUpdateUserMutation();
   const { data: userData, isLoading } = useGetUserByIdQuery(Number(id));
 
@@ -44,7 +44,7 @@ export default function UpdateUser() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUser({ ...user, [e.target.name]: e.target.value });
-    setUserError(""); // Clear error on input change
+    setUserError("");
   };
 
   const handleUpdateUser = async (e: React.FormEvent) => {
@@ -56,8 +56,20 @@ export default function UpdateUser() {
     }
 
     try {
-      await updateUser({ id: user.id, updatedUser: { ...user } }).unwrap();
-      router.push("/users"); // Redirect to Users page after updating the user
+      await updateUser({ id: user.id, updatedUser: { ...user } })
+        .unwrap()
+        .then(async () => {
+          const result = await Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "User updated successfully!",
+            confirmButtonText: "OK",
+          });
+          if (result.isConfirmed) {
+            router.push("/users");
+          }
+        });
+      router.push("/users");
     } catch (err) {
       console.error("Failed to update user:", err);
       setUserError("An error occurred while updating the user.");
