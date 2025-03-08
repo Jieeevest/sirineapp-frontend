@@ -463,14 +463,17 @@ export default function SirineSaleLanding() {
                         {item.name}
                       </CardTitle>
                     </CardHeader>
-                    <p className="text-gray-500 text-sm font-bold px-4">
-                      Stock: <span className="mr-2">{item.quantity}</span>
+                    <p className="text-gray-500 text-sm font-medium px-4">
+                      <span className="">{item.quantity}</span> items left
                     </p>
 
                     <CardContent className="px-4">
                       <p className="text-gray-700 text-lg font-bold">
                         <span className="mr-2">
-                          {formatCurrency(item.price)}
+                          {formatCurrency(item.price)}{" "}
+                          <span className="text-gray-500 text-sm font-medium">
+                            / item
+                          </span>
                         </span>
                       </p>
                       {user.accessToken && (
