@@ -75,7 +75,7 @@ export default function SirineSaleLanding() {
             id: product.id,
             name: product.name,
             price: String(product.price),
-            image: "/vercel.svg",
+            image: "/notfound.png",
             quantity: product.stock,
           });
         });
@@ -455,7 +455,7 @@ export default function SirineSaleLanding() {
                       height={300}
                       className="w-full h-64 object-cover"
                     />
-                    <CardHeader className="p-4">
+                    <CardHeader className="p-4 min-h-28">
                       <CardTitle
                         className="text-black text-base font-medium line-clamp-3"
                         title={item.name} // Tooltip for the full text
@@ -463,8 +463,11 @@ export default function SirineSaleLanding() {
                         {item.name}
                       </CardTitle>
                     </CardHeader>
+                    <p className="text-gray-500 text-sm font-bold px-4">
+                      Stock: <span className="mr-2">{item.quantity}</span>
+                    </p>
 
-                    <CardContent className="p-4">
+                    <CardContent className="px-4">
                       <p className="text-gray-700 text-lg font-bold">
                         <span className="mr-2">
                           {formatCurrency(item.price)}
