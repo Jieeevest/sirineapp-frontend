@@ -9,6 +9,7 @@ import {
   useGetUserByIdQuery,
   useUpdateUserMutation,
 } from "../../../../../services/api";
+import { ArrowLeft, Save } from "lucide-react";
 
 interface User {
   id: number;
@@ -153,8 +154,19 @@ export default function UpdateUser() {
 
             {userError && <p className="text-red-500 text-sm">{userError}</p>}
 
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
+              <Button
+                type="reset"
+                variant="outline"
+                size="lg"
+                className="border-[1px] border-gray-400"
+                onClick={() => router.back()}
+              >
+                <ArrowLeft className="w-5 h-5 " />
+                Cancel
+              </Button>
               <Button type="submit" variant="default" size="lg">
+                <Save className="w-5 h-5 " />
                 Save Changes
               </Button>
             </div>

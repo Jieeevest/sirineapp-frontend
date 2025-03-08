@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useCreateCategoryMutation } from "../../../../services/api";
+import { ArrowLeft, Save } from "lucide-react";
 interface Category {
   name: string;
 }
@@ -125,14 +126,20 @@ export default function AddCategory() {
               )}
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
               <Button
-                type="submit"
-                variant="default"
+                type="reset"
+                variant="outline"
                 size="lg"
-                disabled={formState.isSubmitting} // Disable button while submitting
+                className="border-[1px] border-gray-400"
+                onClick={() => router.back()}
               >
-                {formState.isSubmitting ? "Adding..." : "Add Category"}
+                <ArrowLeft className="w-5 h-5 " />
+                Cancel
+              </Button>
+              <Button type="submit" variant="default" size="lg">
+                <Save className="w-5 h-5 " />
+                Save Changes
               </Button>
             </div>
           </form>
