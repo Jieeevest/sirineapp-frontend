@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -62,8 +63,14 @@ export default function Login() {
             router.push("/admin/orders");
           }
         });
-    } catch (err) {
-      console.log(err);
+    } catch (err: any) {
+      setLoading(false);
+      await Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: err.data.message,
+        confirmButtonText: "OK",
+      });
     } finally {
       setLoading(false);
     }
