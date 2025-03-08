@@ -14,7 +14,10 @@ interface Product {
   description?: string;
   price: number;
   stock: number;
+  image?: File | null;
+  isPublic: boolean;
   categoryId: number;
+  category: Category;
   createdAt: string;
   updatedAt: string;
 }

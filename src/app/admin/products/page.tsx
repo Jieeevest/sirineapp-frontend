@@ -35,8 +35,8 @@ import {
   PaginationItem,
   PaginationLink,
 } from "@/components/ui/pagination";
-import { formatDate } from "@/helpers";
 import { formatCurrency } from "@/helpers/formatCurrency";
+import { Badge } from "@/components/ui/badge";
 
 export default function Products() {
   const router = useRouter();
@@ -97,9 +97,26 @@ export default function Products() {
 
   return (
     <div className="flex min-h-screen w-full min-w-[1000px] flex-col">
-      <main className="flex flex-1 flex-col gap-4 p-4 md:p-8">
+      <main className="flex flex-1 flex-col gap-4 px-8 pt-4">
+        <nav className="mb-6 text-sm text-gray-600">
+          <ol className="list-none p-0 flex space-x-2">
+            <li>
+              <a href="/admin/dashboard" className="hover:font-semibold">
+                Dashboard
+              </a>
+            </li>
+            <li>&gt;</li>
+            <li>
+              <a href="/admin/products" className="hover:font=semibold">
+                Products
+              </a>
+            </li>
+            <li>&gt;</li>
+            <li className="font-semibold text-gray-800">Add Data</li>
+          </ol>
+        </nav>
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-semibold leading-tight tracking-tight text-gray-800">
+          <h1 className="text-2xl font-semibold leading-tight tracking-tight text-gray-800">
             Product Management
           </h1>
           <Button
@@ -114,7 +131,7 @@ export default function Products() {
         </div>
 
         {/* Search Bar */}
-        <div className="mb-2 mt-4">
+        <div className="mb-2">
           <label className="block text-sm font-semibold text-gray-700">
             Search Keyword
           </label>
@@ -142,12 +159,18 @@ export default function Products() {
                   <TableHead className="hidden w-[50px] sm:table-cell">
                     #
                   </TableHead>
-                  <TableHead className="w-[100px]">Product ID</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Description</TableHead>
+                  <TableHead className="w-[130px] justify-center">
+                    Product ID
+                  </TableHead>
+                  <TableHead className="w-[400px] justify-center">
+                    Product Name
+                  </TableHead>
+                  <TableHead>Category</TableHead>
                   <TableHead>Price</TableHead>
-                  <TableHead>Stock</TableHead>
-                  <TableHead>Created At</TableHead>
+                  <TableHead className="w-[100px] text-center">Stock</TableHead>
+                  <TableHead className="w-[150px] text-center">
+                    Show Catalog
+                  </TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -168,10 +191,30 @@ export default function Products() {
                       <TableCell className="font-medium w-80">
                         {product.name}
                       </TableCell>
-                      <TableCell>{product.description || "-"}</TableCell>
+                      <TableCell>{product.category.name}</TableCell>
+                      {/* <TableCell>{product.description || "-"}</TableCell> */}
                       <TableCell>{formatCurrency(product.price)}</TableCell>
-                      <TableCell>{product.stock || "0"}</TableCell>
-                      <TableCell>{formatDate(product.createdAt)}</TableCell>
+                      <TableCell>
+                        <p
+                          className={`font-medium text-center ${
+                            product.stock <= 10 ? "text-red-500" : ""
+                          }`}
+                        >
+                          {product.stock || "0"}
+                        </p>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {
+                          <Badge
+                            variant={
+                              product.isPublic ? "outline" : "destructive"
+                            }
+                          >
+                            {product.isPublic ? "Yes" : "No"}
+                          </Badge>
+                        }
+                      </TableCell>
+
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
