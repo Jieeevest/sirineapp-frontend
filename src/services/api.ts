@@ -54,6 +54,7 @@ interface Order {
   id: number;
   userId: number;
   totalAmount: number;
+  user: User;
   status: string;
   createdAt: string;
   updatedAt: string;

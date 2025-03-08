@@ -28,6 +28,7 @@ import {
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/helpers/formatCurrency";
+import Loading from "@/components/atoms/Loading";
 
 // Product type definition
 type Product = {
@@ -54,7 +55,7 @@ export default function SirineSaleLanding() {
   const [products, setProducts] = useState<any[]>([]);
 
   const { data: categoriesData } = useGetPublicCategoriesQuery();
-  const [createOrder] = useCreateOrderMutation();
+  const [createOrder, { isLoading }] = useCreateOrderMutation();
 
   useEffect(() => {
     if (categoriesData) {
@@ -101,22 +102,45 @@ export default function SirineSaleLanding() {
     }
 
     try {
-      await createOrder({
-        userEmail: String(user.email),
-        cart: cart.map((item) => ({
-          productId: item.id,
-          quantity: item.quantity,
-          price: item.price,
-        })),
-      }).unwrap();
+      Swal.fire({
+        title: "Are you sure?",
+        text: "Please confirm your order to proceed to checkout.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, confirm",
+        cancelButtonText: "Cancel",
+        reverseButtons: true,
+      }).then(async (res) => {
+        if (res.isConfirmed) {
+          await createOrder({
+            userEmail: String(user.email),
+            cart: cart.map((item) => ({
+              productId: item.id,
+              quantity: item.quantity,
+              price: item.price,
+            })),
+          }).unwrap();
 
-      alert("Order placed successfully!");
-      setTimeout(() => {
-        router.push("/orders"); // Redirect ke halaman daftar pesanan
-      }, 1000);
-    } catch (err) {
-      console.error("Failed to place order:", err);
-      console.error("An error occurred while placing the order.");
+          const result = await Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "Order placed successfully!",
+            confirmButtonText: "OK",
+          });
+          if (result.isConfirmed) {
+            router.push("/customer/orders");
+          }
+        } else if (res.isDismissed) {
+          console.log("Logout cancelled.");
+        }
+      });
+    } catch (err: any) {
+      await Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: err.data.message,
+        confirmButtonText: "OK",
+      });
     }
   };
 
@@ -227,6 +251,8 @@ export default function SirineSaleLanding() {
       }
     });
   };
+
+  if (isLoading) return <Loading />;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -508,7 +534,9 @@ export default function SirineSaleLanding() {
                 >
                   <div className="mr-10">
                     <p className="text-lg font-medium">{item.name}</p>
-                    <p className="text-gray-500">Rp.{item.price}</p>
+                    <p className="text-gray-500">
+                      {formatCurrency(Number(item.price))} per item
+                    </p>
                   </div>
 
                   {/* Quantity Control */}

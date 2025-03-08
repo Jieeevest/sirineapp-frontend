@@ -1,5 +1,4 @@
 import React from "react";
-import Image from "next/image";
 
 import {
   Sidebar,
@@ -76,17 +75,19 @@ export function AppSidebar() {
   return (
     <Sidebar>
       {/* Logo Section */}
-      <div className="flex items-center p-4 bg-gray-50 border-b border-gray-200">
-        <Image
-          src="/siren.svg"
-          alt="App Logo"
-          width={10}
-          height={10}
-          className="h-6 w-6"
-        />
-        <span className="text-lg font-semibold text-gray-800 pt-1 ml-2">
-          Sirine App
-        </span>
+      <div className="flex items-center p-4 ">
+        <div className="text-2xl font-bold">
+          <a
+            href="#"
+            className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600"
+            style={{
+              textShadow:
+                "2px 2px 4px rgba(0, 0, 0, 0.1), 0 0 25px rgba(0, 0, 0, 0.3), 0 0 50px rgba(0, 0, 0, 0.3)",
+            }}
+          >
+            Gudang Sirine
+          </a>
+        </div>
       </div>
 
       {/* Sidebar Content */}
