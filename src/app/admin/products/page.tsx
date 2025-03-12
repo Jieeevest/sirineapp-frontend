@@ -112,7 +112,7 @@ export default function Products() {
               </a>
             </li>
             <li>&gt;</li>
-            <li className="font-semibold text-gray-800">Add Data</li>
+            <li className="font-semibold text-gray-800">List Data</li>
           </ol>
         </nav>
         <div className="flex justify-between items-center">

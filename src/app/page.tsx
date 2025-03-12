@@ -20,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, ShoppingCart } from "lucide-react";
+import { LogOut, ShoppingBag, ShoppingCart } from "lucide-react";
 import {
   useCreateOrderMutation,
   useGetPublicCategoriesQuery,
@@ -290,7 +290,7 @@ export default function SirineSaleLanding() {
                                 alt={localStorage.getItem("userName") || "User"}
                               />
                               <AvatarFallback className="rounded-lg">
-                                SA
+                                {user.name?.charAt(0)}
                               </AvatarFallback>
                             </Avatar>
                             <div className="grid flex-1 text-left text-sm leading-tight">
@@ -317,7 +317,7 @@ export default function SirineSaleLanding() {
                                   alt={user.name || "User"}
                                 />
                                 <AvatarFallback className="rounded-lg">
-                                  SA
+                                  {user.name?.charAt(0)}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -330,6 +330,20 @@ export default function SirineSaleLanding() {
                               </div>
                             </div>
                           </DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() =>
+                              router.push(
+                                user.role == "Admin"
+                                  ? "/admin/orders"
+                                  : "/customer/orders"
+                              )
+                            }
+                            className="cursor-pointer"
+                          >
+                            <ShoppingBag />
+                            My Showcase
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={handleLogout}

@@ -103,9 +103,26 @@ export default function Categories() {
 
   return (
     <div className="flex min-h-screen w-full min-w-[1000px] flex-col">
-      <main className="flex flex-1 flex-col gap-2 p-8">
+      <main className="flex flex-1 flex-col gap-4 px-8 pt-4">
+        <nav className="mb-6 text-sm text-gray-600">
+          <ol className="list-none p-0 flex space-x-2">
+            <li>
+              <a href="/admin/dashboard" className="hover:font-semibold">
+                Dashboard
+              </a>
+            </li>
+            <li>&gt;</li>
+            <li>
+              <a href="/admin/categories" className="hover:font=semibold">
+                Categories
+              </a>
+            </li>
+            <li>&gt;</li>
+            <li className="font-semibold text-gray-800">List Data</li>
+          </ol>
+        </nav>
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-semibold leading-tight tracking-tight text-gray-800">
+          <h1 className="text-2xl font-semibold leading-tight tracking-tight text-gray-800">
             Categories Management
           </h1>
           <Button
@@ -120,7 +137,7 @@ export default function Categories() {
         </div>
 
         {/* Search Bar */}
-        <div className="mb-2 mt-4">
+        <div className="mb-2">
           <label className="block text-sm font-semibold text-gray-700">
             Search Keyword
           </label>

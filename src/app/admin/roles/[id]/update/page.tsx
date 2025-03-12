@@ -73,9 +73,9 @@ export default function UpdateRole() {
   if (isLoading) return <p>Loading...</p>;
 
   return (
-    <div className="flex min-h-screen w-full min-w-[1000px] flex-col p-4">
+    <div className="flex min-h-screen w-full min-w-[1000px] flex-col px-8 pt-4">
       {/* Breadcrumb */}
-      <nav className="mb-4 text-sm text-gray-600">
+      <nav className="mb-10 text-sm text-gray-600">
         <ol className="list-none p-0 flex space-x-2">
           <li>
             <a href="/dashboard" className="hover:text-blue-600">
@@ -89,17 +89,17 @@ export default function UpdateRole() {
             </a>
           </li>
           <li>&gt;</li>
-          <li className="font-semibold text-gray-800">Update Role</li>
+          <li className="font-semibold text-gray-800">Edit Data</li>
         </ol>
       </nav>
 
-      <h1 className="text-2xl font-semibold mb-4">Update Role</h1>
+      <h1 className="text-2xl font-semibold mb-4">Edit Role Information</h1>
 
       {/* Card Wrapper */}
       <Card className="w-full max-w-3xl">
         <CardHeader>
-          <p className="font-semibold border-b-2 border-gray-200 pb-4">
-            Update the role details below
+          <p className="border-b-2 border-gray-200 pb-4 text-sm text-gray-600 font-semibold">
+            Please fill in the form below to update the role.
           </p>
         </CardHeader>
         <CardContent>

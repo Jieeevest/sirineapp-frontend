@@ -150,9 +150,9 @@ export default function UpdateProduct() {
   //   if (error) return <p>Error fetching product details!</p>;
 
   return (
-    <div className="flex min-h-screen w-full min-w-[1000px] flex-col p-4">
+    <div className="flex min-h-screen w-full min-w-[1000px] flex-col px-8 pt-4">
       {/* Breadcrumb */}
-      <nav className="mb-4 text-sm text-gray-600">
+      <nav className="mb-10 text-sm text-gray-600">
         <ol className="list-none p-0 flex space-x-2">
           <li>
             <a href="/admin/dashboard" className="hover:font-semibold">
