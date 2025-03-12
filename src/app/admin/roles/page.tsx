@@ -33,6 +33,7 @@ import {
   PaginationLink,
 } from "@/components/ui/pagination";
 import { formatDate } from "@/helpers";
+import Swal from "sweetalert2";
 
 export default function Roles() {
   const router = useRouter();
@@ -53,13 +54,31 @@ export default function Roles() {
   };
 
   const handleDeleteRole = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this role?")) {
-      try {
-        await deleteRole(id);
-      } catch (err) {
-        console.error("Failed to delete role:", err);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will delete this role.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete",
+      cancelButtonText: "Cancel",
+      reverseButtons: true,
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await deleteRole(id).then(async () => {
+          const result = await Swal.fire({
+            icon: "success",
+            title: "Deleted!",
+            text: "You have been successfully delete this role.",
+            confirmButtonText: "OK",
+          });
+          if (result.isConfirmed) {
+            router.push("/admin/roles");
+          }
+        });
+      } else if (result.isDismissed) {
+        console.log("Logout cancelled.");
       }
-    }
+    });
   };
 
   // Filter roles by search term

@@ -36,6 +36,7 @@ import {
   PaginationItem,
   PaginationLink,
 } from "@/components/ui/pagination";
+import Swal from "sweetalert2";
 
 export default function Categories() {
   const router = useRouter();
@@ -59,17 +60,31 @@ export default function Categories() {
 
   // Handle deleting a category
   const handleDeleteCategory = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this category?")) {
-      try {
-        await deleteCategory(id);
-        alert("Category deleted successfully!");
-        setTimeout(() => {
-          router.push("/admin/categories");
-        }, 500);
-      } catch (err) {
-        console.error("Failed to delete category:", err);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will delete this category.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete",
+      cancelButtonText: "Cancel",
+      reverseButtons: true,
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await deleteCategory(id).then(async () => {
+          const result = await Swal.fire({
+            icon: "success",
+            title: "Deleted!",
+            text: "You have been successfully delete this category.",
+            confirmButtonText: "OK",
+          });
+          if (result.isConfirmed) {
+            router.push("/admin/categories");
+          }
+        });
+      } else if (result.isDismissed) {
+        console.log("Logout cancelled.");
       }
-    }
+    });
   };
 
   // Filter categories by search term
@@ -180,9 +195,6 @@ export default function Categories() {
                       <div>
                         <span className="block mb-4">
                           No categories available.
-                        </span>
-                        <span className="block">
-                          Please add a category to get started.
                         </span>
                       </div>
                     </TableCell>

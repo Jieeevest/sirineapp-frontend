@@ -49,12 +49,14 @@ export default function AddProduct() {
     price?: string;
     stock?: string;
     image?: string;
+    category?: string;
   }>({
     name: "",
     description: "",
     price: "",
     stock: "",
     image: "",
+    category: "",
   });
 
   const { data: categories } = useGetCategoriesQuery();
@@ -86,7 +88,7 @@ export default function AddProduct() {
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { name, description, price, stock, image } = product;
+    const { name, description, price, stock, image, categoryId } = product;
 
     // Simple validation for empty fields
     const newErrors: {
@@ -95,12 +97,14 @@ export default function AddProduct() {
       price?: string;
       stock?: string;
       image?: string;
+      category?: string;
     } = {};
     if (!name) newErrors.name = "Product name is required";
     if (!description) newErrors.description = "Product description is required";
     if (!price) newErrors.price = "Price is required";
     if (!stock) newErrors.stock = "Stock is required";
     if (!image) newErrors.image = "Image is required";
+    if (!categoryId) newErrors.category = "Category is required";
 
     setErrors(newErrors);
 
@@ -179,8 +183,9 @@ export default function AddProduct() {
                 name="image"
                 type="file"
                 accept="image/*"
-                className="border border-gray-300 rounded-md p-2 hover:border-gray-900"
+                // className="border border-gray-300 rounded-md p-2 hover:border-gray-900"
                 onChange={handleFileChange}
+                className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-2 h-10 w-full transition duration-300 hover:cursor-pointer hover:shadow-md hover:border-gray-900"
               />
               {errors.image && (
                 <p className="text-red-500 text-sm">{errors.image}</p>
@@ -237,7 +242,7 @@ export default function AddProduct() {
                   setProduct((prev) => ({ ...prev, categoryId: Number(value) }))
                 }
               >
-                <SelectTrigger className="w-full mt-2 p-2 border rounded-md text-sm">
+                <SelectTrigger className="w-full mt-2 p-5 border rounded-md text-sm">
                   <SelectValue placeholder="Select Category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -251,8 +256,8 @@ export default function AddProduct() {
                   ))}
                 </SelectContent>
               </Select>
-              {errors.description && (
-                <p className="text-red-500 text-sm">{errors.description}</p>
+              {errors.category && (
+                <p className="text-red-500 text-sm">{errors.category}</p>
               )}
             </div>
             <div className="space-y-5">
@@ -273,9 +278,6 @@ export default function AddProduct() {
                   }
                 />
               </label>
-              {errors.description && (
-                <p className="text-red-500 text-sm">{errors.description}</p>
-              )}
             </div>
 
             <div className="space-y-1">

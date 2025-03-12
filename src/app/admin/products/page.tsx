@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/pagination";
 import { formatCurrency } from "@/helpers/formatCurrency";
 import { Badge } from "@/components/ui/badge";
+import Swal from "sweetalert2";
 
 export default function Products() {
   const router = useRouter();
@@ -57,13 +58,31 @@ export default function Products() {
   };
 
   const handleDeleteProduct = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      try {
-        await deleteProduct(id);
-      } catch (err) {
-        console.error("Failed to delete product:", err);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will delete this product.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete",
+      cancelButtonText: "Cancel",
+      reverseButtons: true,
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await deleteProduct(id).then(async () => {
+          const result = await Swal.fire({
+            icon: "success",
+            title: "Deleted!",
+            text: "You have been successfully delete this product.",
+            confirmButtonText: "OK",
+          });
+          if (result.isConfirmed) {
+            router.push("/admin/products");
+          }
+        });
+      } else if (result.isDismissed) {
+        console.log("Logout cancelled.");
       }
-    }
+    });
   };
 
   // Filter products by search term

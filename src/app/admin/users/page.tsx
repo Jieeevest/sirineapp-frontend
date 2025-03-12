@@ -33,6 +33,7 @@ import {
   PaginationLink,
 } from "@/components/ui/pagination";
 import { formatDate } from "@/helpers";
+import Swal from "sweetalert2";
 
 export default function Users() {
   const router = useRouter();
@@ -53,13 +54,31 @@ export default function Users() {
   };
 
   const handleDeleteUser = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      try {
-        await deleteUser(id);
-      } catch (err) {
-        console.error("Failed to delete user:", err);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will delete this user.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete",
+      cancelButtonText: "Cancel",
+      reverseButtons: true,
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await deleteUser(id).then(async () => {
+          const result = await Swal.fire({
+            icon: "success",
+            title: "Deleted!",
+            text: "You have been successfully delete this user.",
+            confirmButtonText: "OK",
+          });
+          if (result.isConfirmed) {
+            router.push("/admin/users");
+          }
+        });
+      } else if (result.isDismissed) {
+        console.log("Logout cancelled.");
       }
-    }
+    });
   };
 
   // Filter users by search term
