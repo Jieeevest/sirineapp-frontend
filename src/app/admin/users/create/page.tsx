@@ -112,7 +112,7 @@ export default function AddUser() {
           <form onSubmit={handleAddUser} className="space-y-4">
             <div className="space-y-1">
               <label htmlFor="name" className="text-sm font-medium">
-                Name
+                Name<span className="text-red-500">*</span>
               </label>
               <Input
                 id="name"
@@ -120,12 +120,13 @@ export default function AddUser() {
                 value={user.name}
                 onChange={handleChange}
                 placeholder="Enter user name"
+                className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
               />
             </div>
 
             <div className="space-y-1">
               <label htmlFor="email" className="text-sm font-medium">
-                Email
+                Email<span className="text-red-500">*</span>
               </label>
               <Input
                 id="email"
@@ -134,12 +135,13 @@ export default function AddUser() {
                 value={user.email}
                 onChange={handleChange}
                 placeholder="Enter user email"
+                className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
               />
             </div>
 
             <div className="space-y-1">
               <label htmlFor="password" className="text-sm font-medium">
-                Password
+                Password<span className="text-red-500">*</span>
               </label>
               <Input
                 id="password"
@@ -148,13 +150,14 @@ export default function AddUser() {
                 value={user.password}
                 onChange={handleChange}
                 placeholder="Enter password"
+                className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
               />
             </div>
 
             {/* Role Select */}
             <div className="space-y-1">
               <label htmlFor="roleId" className="text-sm font-medium">
-                Role
+                Role<span className="text-red-500">*</span>
               </label>
               {rolesLoading ? (
                 <p>Loading roles...</p>
@@ -164,7 +167,7 @@ export default function AddUser() {
                   name="roleId"
                   value={user.roleId}
                   onChange={handleChange}
-                  className="block w-full mt-2 p-2 border rounded-md text-sm"
+                  className="block w-full mt-2 p-3 border rounded-md text-sm"
                 >
                   <option value="">Select Role</option>
                   {roles &&
@@ -192,7 +195,7 @@ export default function AddUser() {
               </Button>
               <Button type="submit" variant="default" size="lg">
                 <Save className="w-5 h-5 " />
-                Save Changes
+                Save Data
               </Button>
             </div>
           </form>

@@ -345,7 +345,7 @@ export default function UpdateProduct() {
               </Button>
               <Button type="submit" variant="default" size="lg">
                 <Save className="w-5 h-5 " />
-                Save Changes
+                Save Data
               </Button>
             </div>
           </form>

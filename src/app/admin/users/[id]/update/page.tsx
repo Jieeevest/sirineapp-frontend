@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
+  useGetRolesQuery,
   useGetUserByIdQuery,
   useUpdateUserMutation,
 } from "../../../../../services/api";
@@ -23,14 +24,18 @@ export default function UpdateUser() {
   const { id } = useParams();
   const [updateUser] = useUpdateUserMutation();
   const { data: userData, isLoading } = useGetUserByIdQuery(Number(id));
-
+  const {
+    data: roles,
+    isLoading: rolesLoading,
+    error: rolesError,
+  } = useGetRolesQuery(); // Fetch roles
   const [user, setUser] = useState<User>({
     id: 0,
     name: "",
     email: "",
     roleId: 1,
   });
-  const [userError, setUserError] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
   useEffect(() => {
     if (userData) {
@@ -43,16 +48,19 @@ export default function UpdateUser() {
     }
   }, [userData]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUser({ ...user, [e.target.name]: e.target.value });
-    setUserError("");
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setUser((prevUser) => ({ ...prevUser, [name]: value }));
+    setError(""); // Clear error on input change
   };
 
   const handleUpdateUser = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!user.name || !user.email) {
-      setUserError("All fields are required");
+      setError("All fields are required");
       return;
     }
 
@@ -73,12 +81,16 @@ export default function UpdateUser() {
       router.push("/users");
     } catch (err) {
       console.error("Failed to update user:", err);
-      setUserError("An error occurred while updating the user.");
+      setError("An error occurred while updating the user.");
     }
   };
 
   if (isLoading) return <p>Loading...</p>;
-
+  // Error handling if roles fail to load
+  if (rolesError) {
+    console.error("Failed to fetch roles:", rolesError);
+    setError("Failed to load roles.");
+  }
   return (
     <div className="flex min-h-screen w-full min-w-[1000px] flex-col px-8 pt-4">
       {/* Breadcrumb */}
@@ -113,7 +125,7 @@ export default function UpdateUser() {
           <form onSubmit={handleUpdateUser} className="space-y-4">
             <div className="space-y-1">
               <label htmlFor="name" className="text-sm font-medium">
-                Name
+                Name<span className="text-red-500">*</span>
               </label>
               <Input
                 id="name"
@@ -121,12 +133,13 @@ export default function UpdateUser() {
                 value={user.name}
                 onChange={handleChange}
                 placeholder="Enter user name"
+                className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
               />
             </div>
 
             <div className="space-y-1">
               <label htmlFor="email" className="text-sm font-medium">
-                Email
+                Email<span className="text-red-500">*</span>
               </label>
               <Input
                 id="email"
@@ -135,24 +148,37 @@ export default function UpdateUser() {
                 value={user.email}
                 onChange={handleChange}
                 placeholder="Enter user email"
+                className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
               />
             </div>
 
+            {/* Role Select */}
             <div className="space-y-1">
               <label htmlFor="roleId" className="text-sm font-medium">
-                Role ID
+                Role<span className="text-red-500">*</span>
               </label>
-              <Input
-                id="roleId"
-                name="roleId"
-                type="number"
-                value={user.roleId}
-                onChange={handleChange}
-                placeholder="Enter role ID"
-              />
+              {rolesLoading ? (
+                <p>Loading roles...</p>
+              ) : (
+                <select
+                  id="roleId"
+                  name="roleId"
+                  value={user.roleId}
+                  onChange={handleChange}
+                  className="block w-full mt-2 p-3 border rounded-md text-sm"
+                >
+                  <option value="">Select Role</option>
+                  {roles &&
+                    roles.map((role) => (
+                      <option key={role.id} value={role.id}>
+                        {role.name}
+                      </option>
+                    ))}
+                </select>
+              )}
             </div>
 
-            {userError && <p className="text-red-500 text-sm">{userError}</p>}
+            {error && <p className="text-red-500 text-sm">{error}</p>}
 
             <div className="flex justify-end gap-2">
               <Button
@@ -167,7 +193,7 @@ export default function UpdateUser() {
               </Button>
               <Button type="submit" variant="default" size="lg">
                 <Save className="w-5 h-5 " />
-                Save Changes
+                Save Data
               </Button>
             </div>
           </form>

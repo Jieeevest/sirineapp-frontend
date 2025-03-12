@@ -111,7 +111,7 @@ export default function AddCategory() {
           <form onSubmit={handleAddCategory} className="space-y-4">
             <div className="space-y-1">
               <label htmlFor="name" className="text-sm font-medium">
-                Category Name
+                Category Name<span className="text-red-500">*</span>
               </label>
               <Input
                 id="name"
@@ -119,7 +119,8 @@ export default function AddCategory() {
                 value={formState.category.name}
                 onChange={handleChange}
                 placeholder="Enter category name"
-                disabled={formState.isSubmitting} // Disable input while submitting
+                disabled={formState.isSubmitting}
+                className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
               />
               {formState.error && (
                 <p className="text-red-500 text-sm">{formState.error}</p>
@@ -139,7 +140,7 @@ export default function AddCategory() {
               </Button>
               <Button type="submit" variant="default" size="lg">
                 <Save className="w-5 h-5 " />
-                Save Changes
+                Save Data
               </Button>
             </div>
           </form>
