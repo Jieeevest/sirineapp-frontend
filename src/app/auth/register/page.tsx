@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRegisterMutation } from "@/services/authApi";
+import Swal from "sweetalert2";
 
 export default function Register() {
   const router = useRouter();
@@ -26,6 +28,7 @@ export default function Register() {
     confirmPassword: "",
   });
   const [loading, setLoading] = useState(false);
+  const [register] = useRegisterMutation();
 
   const handleChange = (property: string, value: string) => {
     setPayload((prev) => ({ ...prev, [property]: value }));
@@ -54,11 +57,25 @@ export default function Register() {
       return;
     }
     try {
-      // Simulate registration
-      alert("Registration successful!");
-      setTimeout(() => {
-        router.push("/admin/orders");
-      }, 1000);
+      const objectPayload = {
+        ...payload,
+        name: payload.fullName,
+        email: payload.email,
+        password: payload.password,
+      };
+      await register(objectPayload)
+        .unwrap()
+        .then(async () => {
+          const result = await Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "Register successfully!",
+            confirmButtonText: "OK",
+          });
+          if (result.isConfirmed) {
+            router.push("/auth/login");
+          }
+        });
     } catch (err: any) {
       console.log(err);
     } finally {
@@ -123,6 +140,7 @@ export default function Register() {
               </label>
               <Input
                 id="password"
+                type="password"
                 value={payload.password}
                 onChange={(e) => handleChange("password", e.target.value)}
                 placeholder="Enter your password"
