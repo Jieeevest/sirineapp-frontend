@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useGetOrdersQuery } from "../../../services/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatCurrency } from "@/helpers/formatCurrency";
 import { formatDate } from "@/helpers";
 import { useRouter } from "next/navigation";
@@ -24,7 +24,11 @@ import Loading from "@/components/atoms/Loading";
 
 export default function OrdersOverview() {
   const router = useRouter();
-  const { data: orders, isLoading } = useGetOrdersQuery();
+  const { data: orders, isLoading, refetch } = useGetOrdersQuery();
+
+  useEffect(() => {
+    refetch();
+  }, [refetch, orders]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);

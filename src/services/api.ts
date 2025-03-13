@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 // Tipe umum untuk API response
@@ -56,7 +57,19 @@ interface Order {
   userId: number;
   totalAmount: number;
   user: User;
+  address: string;
+  evidence: File;
   status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface OrderItems {
+  id: number;
+  cartId: number;
+  productId: number;
+  product: any;
+  quantity: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -260,9 +273,14 @@ export const api = createApi({
       query: () => "/orders",
       transformResponse: (response: ApiResponse<Order[]>) => response.data,
     }),
-    getOrderById: builder.query<Order, number>({
+    getOrderById: builder.query<
+      { order: Order; orderItems: OrderItems[] },
+      number
+    >({
       query: (id) => `/orders/${id}`,
-      transformResponse: (response: ApiResponse<Order>) => response.data,
+      transformResponse: (
+        response: ApiResponse<{ order: Order; orderItems: OrderItems[] }>
+      ) => response.data,
     }),
     createOrder: builder.mutation<
       Order,
@@ -277,10 +295,7 @@ export const api = createApi({
         body: newOrder,
       }),
     }),
-    updateOrder: builder.mutation<
-      Order,
-      { id: number; updatedOrder: Partial<Order> }
-    >({
+    updateOrder: builder.mutation<Order, { id: number; updatedOrder: any }>({
       query: ({ id, updatedOrder }) => ({
         url: `/orders/${id}`,
         method: "PUT",

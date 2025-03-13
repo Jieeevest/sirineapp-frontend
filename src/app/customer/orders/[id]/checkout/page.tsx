@@ -1,82 +1,128 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Swal from "sweetalert2";
 import { ArrowLeft, Save } from "lucide-react";
-
-interface CheckoutForm {
-  name: string;
-  email: string;
-  address: string;
-  paymentMethod: string;
-  evidence: File | null;
-}
+import { useGetOrderByIdQuery, useUpdateOrderMutation } from "@/services/api";
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { id } = useParams(); // Assuming dynamic routing
   const user = {
     name: localStorage?.getItem("userName"),
     email: localStorage?.getItem("userEmail"),
     role: localStorage?.getItem("userRoleName"),
     avatar: "/avatars/shadcn.jpg",
   };
-  const [checkoutData, setCheckoutData] = useState<CheckoutForm>({
+
+  const [checkout] = useUpdateOrderMutation();
+  const [orderItems, setOrderItems] = useState<any>([]);
+  const [checkoutData, setCheckoutData] = useState<any>({
     name: user?.name || "",
     email: user?.email || "",
     address: "",
     paymentMethod: "",
     evidence: null,
+    status: "",
   });
 
-  const [errors, setErrors] = useState<Partial<CheckoutForm>>({});
+  const [errors, setErrors] = useState<{
+    address: string;
+    evidence: string;
+  }>({
+    address: "",
+    evidence: "",
+  });
+
+  const { data } = useGetOrderByIdQuery(Number(id));
+
+  useEffect(() => {
+    if (data) {
+      setCheckoutData({
+        address: data.order.address,
+        status: data.order.status,
+        evidence: data.order.evidence,
+      });
+      setOrderItems(data.orderItems);
+    }
+  }, [data]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setCheckoutData((prev) => ({ ...prev, [name]: value }));
+    setCheckoutData((prev: any) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { name, email, address, paymentMethod } = checkoutData;
+    const { name, email, address } = checkoutData;
 
-    const newErrors: Partial<CheckoutForm> = {};
+    const newErrors: any = {};
     if (!name) newErrors.name = "Name is required";
     if (!email) newErrors.email = "Email is required";
     if (!address) newErrors.address = "Address is required";
-    if (!paymentMethod) newErrors.paymentMethod = "Payment method is required";
 
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) return;
 
     try {
-      const result = await Swal.fire({
-        icon: "success",
-        title: "Success!",
-        text: "Checkout completed successfully!",
-        confirmButtonText: "OK",
-      });
+      const formData = new FormData();
+      formData.append("address", checkoutData.address);
+      formData.append("status", "paid");
 
-      if (result.isConfirmed) {
-        router.push("/customer/orders");
+      // Pastikan evidence bukan null sebelum ditambahkan ke FormData
+      if (checkoutData.evidence instanceof File) {
+        formData.append("evidence", checkoutData.evidence);
+      } else {
+        console.error("Invalid file type!");
+        return;
       }
+
+      await checkout({ id: Number(id), updatedOrder: formData })
+        .unwrap()
+        .then(async () => {
+          const result = await Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "Checkout completed successfully!",
+            confirmButtonText: "OK",
+          });
+
+          if (result.isConfirmed) {
+            router.push("/customer/orders");
+          }
+        });
     } catch (error) {
       console.error("Checkout failed:", error);
     }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setCheckoutData((prev) => ({ ...prev, evidence: file }));
+    if (!e.target.files || e.target.files.length === 0) {
+      console.warn("No file selected");
+      return;
+    }
+
+    const file = e.target.files[0];
+    console.log("Selected file:", file); // Debugging sebelum update state
+
+    setCheckoutData((prev: any) => {
+      const newData = { ...prev, evidence: file };
+      console.log("Updated checkoutData:", newData); // Debugging setelah update state
+      return newData;
+    });
   };
+
+  console.log(checkoutData);
 
   return (
     <div className="flex min-h-screen w-full flex-col p-4">
@@ -92,6 +138,41 @@ export default function CheckoutPage() {
           <div className="flex justify-between gap-4">
             <div className="w-1/2 px-8 py-4 border-[1px] rounded-md shadow-sm border-gray-300">
               <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
+
+              <ul className="space-y-4">
+                {orderItems.map((item: any) => (
+                  <li
+                    key={item.id}
+                    className="flex justify-between border-b pb-2"
+                  >
+                    <div className="5/6">
+                      <h3 className="text-sm font-medium">
+                        {item.product.name}
+                      </h3>
+                      <p className="text-xs text-gray-500">
+                        Quantity: {item.quantity} pcs
+                      </p>
+                    </div>
+                    <span className="text-sm font-semibold w-2/6 justify-end ml-5">
+                      Rp {item.product.price.toLocaleString("id-ID")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-4 flex justify-between font-semibold text-lg">
+                <span>Total</span>
+                <span>
+                  Rp{" "}
+                  {orderItems
+                    .reduce(
+                      (acc: number, item: any) =>
+                        acc + item.product.price * item.quantity,
+                      0
+                    )
+                    .toLocaleString("id-ID")}
+                </span>
+              </div>
             </div>
             <div className="w-1/2 px-8 py-4 border-[1px] rounded-md shadow-sm border-gray-300">
               <h2 className="text-lg font-semibold mb-4">
@@ -110,9 +191,6 @@ export default function CheckoutPage() {
                     placeholder="Enter your name"
                     disabled
                   />
-                  {errors.name && (
-                    <p className="text-red-500 text-sm">{errors.name}</p>
-                  )}
                 </div>
 
                 <div className="space-y-1">
@@ -128,14 +206,11 @@ export default function CheckoutPage() {
                     placeholder="Enter your email"
                     disabled
                   />
-                  {errors.email && (
-                    <p className="text-red-500 text-sm">{errors.email}</p>
-                  )}
                 </div>
 
                 <div className="space-y-1">
                   <label htmlFor="address" className="text-sm font-medium">
-                    Address
+                    Address<span className="text-red-500">*</span>
                   </label>
                   <Textarea
                     id="address"
@@ -143,6 +218,7 @@ export default function CheckoutPage() {
                     value={checkoutData.address}
                     onChange={handleChange}
                     placeholder="Enter your address"
+                    disabled={Boolean(checkoutData.status !== "pending")}
                     rows={3}
                   />
                   {errors.address && (
@@ -158,46 +234,61 @@ export default function CheckoutPage() {
                     Please transfer the amount to the following account: <br />
                     <span className="font-semibold">
                       BANK CENTRAL ASIA (BCA) 1234567890 a/n Sirine App. <br />
-                      Rp. {0}. <br />
+                      Rp{" "}
+                      {orderItems
+                        .reduce(
+                          (acc: number, item: any) =>
+                            acc + item.product.price * item.quantity,
+                          0
+                        )
+                        .toLocaleString("id-ID")}{" "}
+                      <br />
                     </span>
                     Please include your name in the memo and upload evidence of
                     the transfer below.
                   </label>
                 </div>
 
-                <div className="space-y-1">
+                <div className="">
                   <label
                     htmlFor="paymentMethod"
-                    className="text-sm font-medium"
+                    className="text-sm font-medium mr-5 mt-10"
                   >
-                    Evidence
+                    Evidence<span className="text-red-500">*</span>
                   </label>
-                  <Input
+                  <input
                     id="image"
-                    name="image"
                     type="file"
                     accept="image/*"
-                    className="border border-gray-300 rounded-md p-2 hover:border-gray-900"
+                    className="w-full max-w-sm border border-gray-300 rounded-lg p-2 text-sm text-gray-700 
+               file:bg-gray-100 file:border-0 file:py-2 file:px-4 file:rounded-lg
+               hover:file:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-900"
                     onChange={handleFileChange}
+                    disabled={Boolean(checkoutData.status !== "pending")}
                   />
+                  {errors.evidence && (
+                    <p className="text-red-500 text-sm">{errors.evidence}</p>
+                  )}
                 </div>
 
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="reset"
-                    variant="outline"
-                    size="lg"
-                    className="border-[1px] border-gray-400"
-                    onClick={() => router.back()}
-                  >
-                    <ArrowLeft className="w-5 h-5 " />
-                    Cancel
-                  </Button>
-                  <Button type="submit" variant="default" size="lg">
-                    <Save className="w-5 h-5 " />
-                    Confirm Payment
-                  </Button>
-                </div>
+                {checkoutData.status == "pending" && (
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      type="reset"
+                      variant="outline"
+                      size="lg"
+                      className="border-[1px] border-gray-400"
+                      onClick={() => router.back()}
+                    >
+                      <ArrowLeft className="w-5 h-5 " />
+                      Cancel
+                    </Button>
+                    <Button type="submit" variant="default" size="lg">
+                      <Save className="w-5 h-5 " />
+                      Confirm Payment
+                    </Button>
+                  </div>
+                )}
               </form>
             </div>
           </div>
