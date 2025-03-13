@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Swal from "sweetalert2";
 import { useState } from "react";
@@ -7,32 +8,60 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useCreateRoleMutation } from "../../../../services/api";
 import { ArrowLeft, Save } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Role {
   name: string;
+  description: string;
 }
 
 export default function AddRole() {
   const router = useRouter();
   const [createRole] = useCreateRoleMutation();
-  const [role, setRole] = useState<Role>({ name: "" });
-  const [error, setError] = useState<string>("");
+  const [payload, setPayload] = useState<Role>({
+    name: "",
+    description: "",
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setRole({ name: e.target.value });
-    setError(""); // Clear error on input change
+  const [errors, setErrors] = useState<{
+    name?: string;
+    description?: string;
+  }>({
+    name: "",
+    description: "",
+  });
+
+  const handleChange = (key: string, value: any) => {
+    setPayload({
+      ...payload,
+      [key]: value,
+    });
   };
 
   const handleAddRole = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!role.name) {
-      setError("Role name is required");
-      return;
-    }
+    const { name, description } = payload;
+
+    // Simple validation for empty fields
+    const newErrors: {
+      name?: string;
+      description?: string;
+    } = {};
+    if (!name) newErrors.name = "Role name is required";
+    if (!description) newErrors.description = "Role description is required";
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) return; // If there are errors, do not submit
+
+    const objectPayload = {
+      name,
+      description,
+    };
 
     try {
-      await createRole({ name: role.name })
+      await createRole(objectPayload)
         .unwrap()
         .then(async () => {
           const result = await Swal.fire({
@@ -47,7 +76,6 @@ export default function AddRole() {
         });
     } catch (err) {
       console.error("Failed to create role:", err);
-      setError("An error occurred while creating the role.");
     }
   };
 
@@ -90,12 +118,33 @@ export default function AddRole() {
               <Input
                 id="name"
                 name="name"
-                value={role.name}
-                onChange={handleChange}
+                value={payload.name}
+                onChange={(e) => handleChange("name", e.target.value)}
                 placeholder="Enter role name"
                 className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
               />
-              {error && <p className="text-red-500 text-sm">{error}</p>}
+              {errors.name && (
+                <p className="text-red-500 text-sm">{errors.name}</p>
+              )}
+            </div>
+            <div className="space-y-1">
+              <label
+                htmlFor="description"
+                className="text-sm text-gray-600 font-semibold"
+              >
+                Role Description<span className="text-red-500">*</span>
+              </label>
+              <Textarea
+                id="description"
+                name="description"
+                value={payload.description}
+                onChange={(e) => handleChange("description", e.target.value)}
+                placeholder="Enter role description..."
+                rows={4}
+              />
+              {errors.description && (
+                <p className="text-red-500 text-sm">{errors.description}</p>
+              )}
             </div>
 
             <div className="flex justify-end gap-2">

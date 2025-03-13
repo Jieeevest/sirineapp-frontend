@@ -11,6 +11,7 @@ import {
   useUpdateUserMutation,
 } from "../../../../../services/api";
 import { ArrowLeft, Save } from "lucide-react";
+import Loading from "@/components/atoms/Loading";
 
 interface User {
   id: number;
@@ -24,11 +25,7 @@ export default function UpdateUser() {
   const { id } = useParams();
   const [updateUser] = useUpdateUserMutation();
   const { data: userData, isLoading } = useGetUserByIdQuery(Number(id));
-  const {
-    data: roles,
-    isLoading: rolesLoading,
-    error: rolesError,
-  } = useGetRolesQuery(); // Fetch roles
+  const { data: roles, isLoading: rolesLoading } = useGetRolesQuery(); // Fetch roles
   const [user, setUser] = useState<User>({
     id: 0,
     name: "",
@@ -85,12 +82,7 @@ export default function UpdateUser() {
     }
   };
 
-  if (isLoading) return <p>Loading...</p>;
-  // Error handling if roles fail to load
-  if (rolesError) {
-    console.error("Failed to fetch roles:", rolesError);
-    setError("Failed to load roles.");
-  }
+  if (isLoading || rolesLoading) return <Loading />;
   return (
     <div className="flex min-h-screen w-full min-w-[1000px] flex-col px-8 pt-4">
       {/* Breadcrumb */}

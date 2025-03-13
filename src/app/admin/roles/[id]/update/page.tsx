@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Swal from "sweetalert2";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,10 +11,13 @@ import {
   useUpdateRoleMutation,
 } from "../../../../../services/api";
 import { ArrowLeft, Save } from "lucide-react";
+import Loading from "@/components/atoms/Loading";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Role {
   id: number;
   name: string;
+  description: string;
 }
 
 export default function UpdateRole() {
@@ -22,35 +26,63 @@ export default function UpdateRole() {
   const [updateRole] = useUpdateRoleMutation();
   const { data: roleData, isLoading } = useGetRoleByIdQuery(Number(id));
 
-  const [role, setRole] = useState<Role>({ id: 0, name: "" });
-  const [roleError, setRoleError] = useState<string>("");
+  const [payload, setPayload] = useState<Role>({
+    id: 0,
+    name: "",
+    description: "",
+  });
+
+  const [errors, setErrors] = useState<{
+    name?: string;
+    description?: string;
+  }>({
+    name: "",
+    description: "",
+  });
 
   useEffect(() => {
     if (roleData) {
-      setRole({
+      setPayload({
         id: roleData.id,
         name: roleData.name,
+        description: roleData.description,
       });
     }
   }, [roleData]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setRole({ ...role, name: e.target.value });
-    setRoleError("");
+  const handleChange = (key: string, value: any) => {
+    setPayload({
+      ...payload,
+      [key]: value,
+    });
   };
 
   const handleUpdateRole = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!role.name) {
-      setRoleError("Role name is required");
-      return;
-    }
+    const { id, name, description } = payload;
+
+    // Simple validation for empty fields
+    const newErrors: {
+      name?: string;
+      description?: string;
+    } = {};
+    if (!name) newErrors.name = "Role name is required";
+    if (!description) newErrors.description = "Role description is required";
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) return; // If there are errors, do not submit
+
+    const objectPayload = {
+      name,
+      description,
+    };
 
     try {
       await updateRole({
-        id: role.id,
-        updatedRole: { name: role.name },
+        id,
+        updatedRole: objectPayload,
       })
         .unwrap()
         .then(async () => {
@@ -66,11 +98,10 @@ export default function UpdateRole() {
         });
     } catch (err) {
       console.error("Failed to update role:", err);
-      setRoleError("An error occurred while updating the role.");
     }
   };
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <Loading />;
 
   return (
     <div className="flex min-h-screen w-full min-w-[1000px] flex-col px-8 pt-4">
@@ -111,12 +142,33 @@ export default function UpdateRole() {
               <Input
                 id="name"
                 name="name"
-                value={role.name}
-                onChange={handleChange}
+                value={payload.name}
+                onChange={() => handleChange("name", payload.name)}
                 placeholder="Enter role name"
                 className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
               />
-              {roleError && <p className="text-red-500 text-sm">{roleError}</p>}
+              {errors.name && (
+                <p className="text-red-500 text-sm">{errors.name}</p>
+              )}
+            </div>
+            <div className="space-y-1">
+              <label
+                htmlFor="description"
+                className="text-sm text-gray-600 font-semibold"
+              >
+                Role Description<span className="text-red-500">*</span>
+              </label>
+              <Textarea
+                id="description"
+                name="description"
+                value={payload.description}
+                onChange={(e) => handleChange("description", e.target.value)}
+                placeholder="Enter role description..."
+                rows={4}
+              />
+              {errors.description && (
+                <p className="text-red-500 text-sm">{errors.description}</p>
+              )}
             </div>
 
             <div className="flex justify-end gap-2">

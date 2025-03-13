@@ -45,6 +45,7 @@ interface CartItem {
 interface Category {
   id: number;
   name: string;
+  description: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -75,6 +76,7 @@ interface User {
 export interface Role {
   id: number;
   name: string;
+  description: string;
   createdAt: string;
   updatedAt: string;
 }

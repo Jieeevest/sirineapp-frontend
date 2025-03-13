@@ -24,7 +24,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useGetRolesQuery, useDeleteRoleMutation } from "../../../services/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Pagination,
@@ -37,13 +37,17 @@ import Swal from "sweetalert2";
 
 export default function Roles() {
   const router = useRouter();
-  const { data: roles } = useGetRolesQuery();
+  const { data: roles, refetch } = useGetRolesQuery();
   const [deleteRole] = useDeleteRoleMutation();
 
   // State for pagination and search
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; // Set how many items per page
+
+  useEffect(() => {
+    refetch();
+  }, [roles, refetch]);
 
   const handleAddRole = () => {
     router.push("/admin/roles/create");
@@ -76,7 +80,7 @@ export default function Roles() {
           }
         });
       } else if (result.isDismissed) {
-        console.log("Logout cancelled.");
+        console.log("Delete role cancelled.");
       }
     });
   };
@@ -173,6 +177,7 @@ export default function Roles() {
                   </TableHead>
                   <TableHead className="w-[100px]">Role ID</TableHead>
                   <TableHead>Name</TableHead>
+                  <TableHead>Description</TableHead>
                   <TableHead>Created At</TableHead>
                   <TableHead>Updated At</TableHead>
                   <TableHead>Actions</TableHead>
@@ -193,6 +198,7 @@ export default function Roles() {
                       </TableCell>
                       <TableCell>ROLE-00{role.id}</TableCell>
                       <TableCell className="font-medium">{role.name}</TableCell>
+                      <TableCell>{role.description || "-"}</TableCell>
                       <TableCell>{formatDate(role.createdAt)}</TableCell>
                       <TableCell>{formatDate(role.updatedAt)}</TableCell>
                       <TableCell>

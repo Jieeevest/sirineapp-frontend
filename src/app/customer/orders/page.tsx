@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -15,21 +16,85 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useGetOrdersQuery } from "../../../services/api";
-import { formatDate } from "@/helpers";
+import { useState } from "react";
 import { formatCurrency } from "@/helpers/formatCurrency";
+import { formatDate } from "@/helpers";
 import { useRouter } from "next/navigation";
+import Loading from "@/components/atoms/Loading";
 
-export default function Orders() {
+export default function OrdersOverview() {
   const router = useRouter();
-  const { data: orders } = useGetOrdersQuery();
+  const { data: orders, isLoading } = useGetOrdersQuery();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // Handle search change
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset pagination to first page
+  };
+
+  // Filter orders based on search term
+  const filteredOrders = orders?.filter(
+    (order) =>
+      order.id.toString().includes(searchTerm) ||
+      order.userId.toString().includes(searchTerm)
+  );
+
+  // Paginate orders
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentOrders = filteredOrders?.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+
+  const totalPages = Math.ceil(
+    (filteredOrders?.length ? filteredOrders?.length : 0) / itemsPerPage
+  );
+
+  if (isLoading) return <Loading />;
 
   return (
     <div className="flex min-h-screen w-full min-w-[1000px] flex-col">
-      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <div className="flex">
-          <h1 className="text-2xl font-semibold leading-tight tracking-tight">
-            Orders Management
+      <main className="flex flex-1 flex-col gap-4 px-8 pt-4">
+        <nav className="mb-6 text-sm text-gray-600">
+          <ol className="list-none p-0 flex space-x-2">
+            <li>
+              <a href="/admin/dashboard" className="hover:font-semibold">
+                Dashboard
+              </a>
+            </li>
+            <li>&gt;</li>
+            <li>
+              <a href="/admin/orders" className="hover:font=semibold">
+                Orders
+              </a>
+            </li>
+            <li>&gt;</li>
+            <li className="font-semibold text-gray-800">List Data</li>
+          </ol>
+        </nav>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-semibold leading-tight tracking-tight text-gray-800">
+            Order Management
           </h1>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-2 mt-4">
+          <label className="block text-sm font-semibold text-gray-700">
+            Search Orders
+          </label>
+          <input
+            type="text"
+            placeholder="Search by order keyword..."
+            value={searchTerm}
+            onChange={handleSearch}
+            className="p-3 border rounded-lg w-full"
+          />
         </div>
 
         {/* Data Table Card */}
@@ -56,14 +121,14 @@ export default function Orders() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders?.length === 0 ? (
+                {currentOrders?.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-4">
                       No orders available.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  orders?.map((order, index) => (
+                  currentOrders?.map((order, index) => (
                     <TableRow
                       key={order.id}
                       className="cursor-pointer"
@@ -100,6 +165,25 @@ export default function Orders() {
             </Table>
           </CardContent>
         </Card>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center mt-4 space-x-2">
+            {Array.from({ length: totalPages }, (_, index) => (
+              <Button
+                key={index + 1}
+                onClick={() => setCurrentPage(index + 1)}
+                className={`${
+                  currentPage === index + 1
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-800"
+                } px-4 py-2 rounded-md text-sm`}
+              >
+                {index + 1}
+              </Button>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );

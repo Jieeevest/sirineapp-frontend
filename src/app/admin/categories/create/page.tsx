@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Swal from "sweetalert2";
 import { useState } from "react";
@@ -7,53 +8,60 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useCreateCategoryMutation } from "../../../../services/api";
 import { ArrowLeft, Save } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 interface Category {
   name: string;
+  description: string;
 }
-
-interface FormState {
-  category: Category;
-  error: string;
-  isSubmitting: boolean;
-}
-
-const initialState: FormState = {
-  category: { name: "" },
-  error: "",
-  isSubmitting: false,
-};
 
 export default function AddCategory() {
   const router = useRouter();
-  const [createCategory] = useCreateCategoryMutation();
-  const [formState, setFormState] = useState<FormState>(initialState);
+  const [payload, setPayload] = useState<Category>({
+    name: "",
+    description: "",
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormState((prevState) => ({
-      ...prevState,
-      category: { name: e.target.value },
-      error: "",
-    }));
+  const [errors, setErrors] = useState<{
+    name?: string;
+    description?: string;
+  }>({
+    name: "",
+    description: "",
+  });
+  const [createCategory] = useCreateCategoryMutation();
+
+  const handleChange = (key: string, value: any) => {
+    setPayload({
+      ...payload,
+      [key]: value,
+    });
   };
 
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formState.category.name.trim()) {
-      setFormState((prevState) => ({
-        ...prevState,
-        error: "Category name is required",
-      }));
-      return;
-    }
+    const { name, description } = payload;
 
-    setFormState((prevState) => ({
-      ...prevState,
-      isSubmitting: true,
-    }));
+    // Simple validation for empty fields
+    const newErrors: {
+      name?: string;
+      description?: string;
+    } = {};
+    if (!name) newErrors.name = "Category name is required";
+    if (!description)
+      newErrors.description = "Category description is required";
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) return; // If there are errors, do not submit
+
+    const objectPayload = {
+      name,
+      description,
+    };
 
     try {
-      await createCategory({ name: formState.category.name })
+      await createCategory(objectPayload)
         .unwrap()
         .then(async () => {
           const result = await Swal.fire({
@@ -69,11 +77,6 @@ export default function AddCategory() {
         });
     } catch (err) {
       console.error("Failed to create category:", err);
-      setFormState((prevState) => ({
-        ...prevState,
-        error: "An error occurred while creating the category.",
-        isSubmitting: false,
-      }));
     }
   };
 
@@ -116,14 +119,32 @@ export default function AddCategory() {
               <Input
                 id="name"
                 name="name"
-                value={formState.category.name}
-                onChange={handleChange}
+                value={payload.name}
+                onChange={(e) => handleChange("name", e.target.value)}
                 placeholder="Enter category name"
-                disabled={formState.isSubmitting}
                 className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
               />
-              {formState.error && (
-                <p className="text-red-500 text-sm">{formState.error}</p>
+              {errors.name && (
+                <p className="text-red-500 text-sm">{errors.name}</p>
+              )}
+            </div>
+            <div className="space-y-1">
+              <label
+                htmlFor="description"
+                className="text-sm text-gray-600 font-semibold"
+              >
+                Category Description<span className="text-red-500">*</span>
+              </label>
+              <Textarea
+                id="description"
+                name="description"
+                value={payload.description}
+                onChange={(e) => handleChange("description", e.target.value)}
+                placeholder="Enter category description..."
+                rows={4}
+              />
+              {errors.description && (
+                <p className="text-red-500 text-sm">{errors.description}</p>
               )}
             </div>
 

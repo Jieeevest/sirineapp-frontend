@@ -28,7 +28,7 @@ import {
   useDeleteCategoryMutation,
 } from "../../../services/api"; // Import RTK Query hooks
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatDate } from "@/helpers";
 import {
   Pagination,
@@ -40,13 +40,17 @@ import Swal from "sweetalert2";
 
 export default function Categories() {
   const router = useRouter();
-  const { data: categories } = useGetCategoriesQuery();
+  const { data: categories, refetch } = useGetCategoriesQuery();
   const [deleteCategory] = useDeleteCategoryMutation();
 
   // State for pagination and search
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; // Set how many items per page
+
+  useEffect(() => {
+    refetch();
+  }, [categories, refetch]);
 
   // Handle adding a new category
   const handleAdd = () => {
@@ -180,6 +184,7 @@ export default function Categories() {
                   <TableHead className="hidden sm:table-cell">#</TableHead>
                   <TableHead className="w-[150px]">Category ID</TableHead>
                   <TableHead>Name</TableHead>
+                  <TableHead>Description</TableHead>
                   <TableHead>Created At</TableHead>
                   <TableHead>Updated At</TableHead>
                   <TableHead>Actions</TableHead>
@@ -208,8 +213,11 @@ export default function Categories() {
                       <TableCell className="hidden sm:table-cell">
                         {itemsPerPage * (currentPage - 1) + index + 1}
                       </TableCell>
-                      <TableCell className="font-medium">{`CATEGORY-00${category.id}`}</TableCell>
-                      <TableCell>{category.name}</TableCell>
+                      <TableCell>{`CATEGORY-00${category.id}`}</TableCell>
+                      <TableCell className="font-medium">
+                        {category.name}
+                      </TableCell>
+                      <TableCell>{category.description || "-"}</TableCell>
                       <TableCell>{formatDate(category.createdAt)}</TableCell>
                       <TableCell>{formatDate(category.updatedAt)}</TableCell>
                       <TableCell>

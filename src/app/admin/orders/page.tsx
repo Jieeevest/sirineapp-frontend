@@ -1,14 +1,5 @@
 "use client";
-
-import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -24,30 +15,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  useGetOrdersQuery,
-  useDeleteOrderMutation,
-} from "../../../services/api";
+import { useGetOrdersQuery } from "../../../services/api";
 import { useState } from "react";
+import { formatCurrency } from "@/helpers/formatCurrency";
+import { formatDate } from "@/helpers";
+import { useRouter } from "next/navigation";
 
-export default function Orders() {
-  const { data: orders, isLoading } = useGetOrdersQuery();
-  const [deleteOrder] = useDeleteOrderMutation();
+export default function OrdersOverview() {
+  const router = useRouter();
+  const { data: orders } = useGetOrdersQuery();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-
-  // Handle deletion
-  const handleDeleteOrder = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this order?")) {
-      try {
-        await deleteOrder(id);
-      } catch (err) {
-        console.log(err);
-      }
-    }
-  };
 
   // Handle search change
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,10 +56,27 @@ export default function Orders() {
 
   return (
     <div className="flex min-h-screen w-full min-w-[1000px] flex-col">
-      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <div className="flex justify-between">
-          <h1 className="text-2xl font-semibold leading-tight tracking-tight">
-            Orders Management
+      <main className="flex flex-1 flex-col gap-4 px-8 pt-4">
+        <nav className="mb-6 text-sm text-gray-600">
+          <ol className="list-none p-0 flex space-x-2">
+            <li>
+              <a href="/admin/dashboard" className="hover:font-semibold">
+                Dashboard
+              </a>
+            </li>
+            <li>&gt;</li>
+            <li>
+              <a href="/admin/orders" className="hover:font=semibold">
+                Orders
+              </a>
+            </li>
+            <li>&gt;</li>
+            <li className="font-semibold text-gray-800">List Data</li>
+          </ol>
+        </nav>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-semibold leading-tight tracking-tight text-gray-800">
+            Order Management
           </h1>
         </div>
 
@@ -90,7 +87,7 @@ export default function Orders() {
           </label>
           <input
             type="text"
-            placeholder="Search by Order ID or User ID..."
+            placeholder="Search by order keyword..."
             value={searchTerm}
             onChange={handleSearch}
             className="p-3 border rounded-lg w-full"
@@ -112,23 +109,16 @@ export default function Orders() {
                   <TableHead className="hidden w-[50px] sm:table-cell">
                     #
                   </TableHead>
-                  <TableHead className="w-[100px]">Order ID</TableHead>
-                  <TableHead>User ID</TableHead>
+                  <TableHead className="w-[200px]">Order ID</TableHead>
+                  {/* <TableHead>User Account</TableHead> */}
                   <TableHead>Total Amount</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Created At</TableHead>
                   <TableHead>Updated At</TableHead>
-                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-4">
-                      Loading...
-                    </TableCell>
-                  </TableRow>
-                ) : currentOrders?.length === 0 ? (
+                {currentOrders?.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-4">
                       No orders available.
@@ -136,39 +126,35 @@ export default function Orders() {
                   </TableRow>
                 ) : (
                   currentOrders?.map((order, index) => (
-                    <TableRow key={order.id}>
+                    <TableRow
+                      key={order.id}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        router.push(`/customer/orders/${order.id}/checkout`);
+                      }}
+                    >
                       <TableCell className="hidden sm:table-cell">
                         {index + 1}
                       </TableCell>
-                      <TableCell>ORDER-00{order.id}</TableCell>
-                      <TableCell>{order.userId}</TableCell>
-                      <TableCell>{order.totalAmount}</TableCell>
-                      <TableCell>{order.status}</TableCell>
-                      <TableCell>{order.createdAt}</TableCell>
-                      <TableCell>{order.updatedAt}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              aria-haspopup="true"
-                              size="icon"
-                              variant="ghost"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Toggle menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="start">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleDeleteOrder(order.id)}
-                            >
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                      <TableCell className="font-medium hover:underline hover:text-blue-600 hover:underline-offset-4">
+                        TRANSACTION-00{order.id}
                       </TableCell>
+                      {/* <TableCell>{order.user.name}</TableCell> */}
+                      <TableCell>{formatCurrency(order.totalAmount)}</TableCell>
+                      <TableCell>
+                        <div
+                          className={`flex items-center justify-center rounded-md border-[1px] shadow-md text-white p-1 w-20 ${
+                            order.status == "pending"
+                              ? "bg-yellow-500"
+                              : "bg-green-500"
+                          } "`}
+                        >
+                          {order.status.charAt(0).toUpperCase() +
+                            order.status.slice(1)}
+                        </div>
+                      </TableCell>
+                      <TableCell>{formatDate(order.createdAt)}</TableCell>
+                      <TableCell>{formatDate(order.updatedAt)}</TableCell>
                     </TableRow>
                   ))
                 )}
