@@ -34,10 +34,12 @@ import {
 } from "@/components/ui/pagination";
 import { formatDate } from "@/helpers";
 import Swal from "sweetalert2";
+import Loading from "@/components/atoms/Loading";
 
 export default function Roles() {
   const router = useRouter();
-  const { data: roles, refetch } = useGetRolesQuery();
+  const [loading, setLoading] = useState(false);
+  const { data: roles, refetch, isLoading } = useGetRolesQuery();
   const [deleteRole] = useDeleteRoleMutation();
 
   // State for pagination and search
@@ -50,10 +52,12 @@ export default function Roles() {
   }, [roles, refetch]);
 
   const handleAddRole = () => {
+    setLoading(true);
     router.push("/admin/roles/create");
   };
 
   const handleUpdateRole = (id: number) => {
+    setLoading(true);
     router.push(`/admin/roles/${id}/update`);
   };
 
@@ -68,6 +72,7 @@ export default function Roles() {
       reverseButtons: true,
     }).then(async (result) => {
       if (result.isConfirmed) {
+        setLoading(true);
         await deleteRole(id).then(async () => {
           const result = await Swal.fire({
             icon: "success",
@@ -76,7 +81,8 @@ export default function Roles() {
             confirmButtonText: "OK",
           });
           if (result.isConfirmed) {
-            router.push("/admin/roles");
+            setLoading(false);
+            refetch();
           }
         });
       } else if (result.isDismissed) {
@@ -110,6 +116,10 @@ export default function Roles() {
   const totalPages = Math.ceil(
     (filteredRoles?.length ? filteredRoles?.length : 0) / itemsPerPage
   );
+
+  if (isLoading || loading) {
+    return <Loading />;
+  }
 
   return (
     <div className="flex min-h-screen w-full min-w-[1000px] flex-col">
