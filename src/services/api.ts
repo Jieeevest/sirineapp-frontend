@@ -81,6 +81,7 @@ interface User {
   email: string;
   roleId: number;
   roles: Role;
+  phoneNumber: string;
   createdAt: string;
   updatedAt: string;
 }

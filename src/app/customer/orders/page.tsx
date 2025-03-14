@@ -150,14 +150,17 @@ export default function OrdersOverview() {
                       <TableCell>{formatCurrency(order.totalAmount)}</TableCell>
                       <TableCell>
                         <div
-                          className={`flex items-center justify-center rounded-md border-[1px] shadow-md text-white p-1 w-20 ${
+                          className={`flex items-center justify-center rounded-md border-[1px] shadow-md text-white p-1 w-32 ${
                             order.status == "pending"
-                              ? "bg-yellow-500"
-                              : "bg-green-500"
+                              ? "bg-red-500"
+                              : order.status == "paid"
+                              ? "bg-green-500"
+                              : "bg-blue-500"
                           } "`}
                         >
                           {order.status.charAt(0).toUpperCase() +
                             order.status.slice(1)}
+                          {order.status == "pending" && " Payment "}
                         </div>
                       </TableCell>
                       <TableCell>{formatDate(order.createdAt)}</TableCell>

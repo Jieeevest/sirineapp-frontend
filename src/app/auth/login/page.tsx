@@ -60,7 +60,11 @@ export default function Login() {
             confirmButtonText: "OK",
           });
           if (result.isConfirmed) {
-            router.push("/admin/orders");
+            router.push(
+              responseData.role.id.toString() == "1"
+                ? "/admin/orders"
+                : "/customer/orders"
+            );
           }
         });
     } catch (err: any) {

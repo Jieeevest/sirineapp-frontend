@@ -212,7 +212,9 @@ export default function Dashboard() {
                           key={order.id}
                           className="cursor-pointer"
                           onClick={() => {
-                            router.push(`/admin/orders/${order.id}/checkout`);
+                            router.push(
+                              `/customer/orders/${order.id}/checkout`
+                            );
                           }}
                         >
                           <TableCell className="hidden sm:table-cell">

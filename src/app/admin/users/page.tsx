@@ -24,7 +24,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useGetUsersQuery, useDeleteUserMutation } from "../../../services/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Pagination,
@@ -37,13 +37,17 @@ import Swal from "sweetalert2";
 
 export default function Users() {
   const router = useRouter();
-  const { data: users } = useGetUsersQuery();
+  const { data: users, refetch } = useGetUsersQuery();
   const [deleteUser] = useDeleteUserMutation();
 
   // State for pagination and search
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; // Set how many items per page
+
+  useEffect(() => {
+    refetch();
+  }, [users, refetch]);
 
   const handleAddUser = () => {
     router.push("/admin/users/create");

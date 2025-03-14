@@ -16,14 +16,18 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useGetOrdersQuery } from "../../../services/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatCurrency } from "@/helpers/formatCurrency";
 import { formatDate } from "@/helpers";
 import { useRouter } from "next/navigation";
 
 export default function OrdersOverview() {
   const router = useRouter();
-  const { data: orders } = useGetOrdersQuery();
+  const { data: orders, refetch } = useGetOrdersQuery();
+
+  useEffect(() => {
+    refetch();
+  }, [orders, refetch]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -130,7 +134,7 @@ export default function OrdersOverview() {
                       key={order.id}
                       className="cursor-pointer"
                       onClick={() => {
-                        router.push(`/customer/orders/${order.id}/checkout`);
+                        router.push(`/admin/orders/${order.id}/checkout`);
                       }}
                     >
                       <TableCell className="hidden sm:table-cell">
@@ -143,14 +147,17 @@ export default function OrdersOverview() {
                       <TableCell>{formatCurrency(order.totalAmount)}</TableCell>
                       <TableCell>
                         <div
-                          className={`flex items-center justify-center rounded-md border-[1px] shadow-md text-white p-1 w-20 ${
+                          className={`flex items-center justify-center rounded-md border-[1px] shadow-md text-white p-1 w-32 ${
                             order.status == "pending"
-                              ? "bg-yellow-500"
-                              : "bg-green-500"
+                              ? "bg-red-500"
+                              : order.status == "paid"
+                              ? "bg-green-500"
+                              : "bg-blue-500"
                           } "`}
                         >
                           {order.status.charAt(0).toUpperCase() +
                             order.status.slice(1)}
+                          {order.status == "pending" && " Payment "}
                         </div>
                       </TableCell>
                       <TableCell>{formatDate(order.createdAt)}</TableCell>

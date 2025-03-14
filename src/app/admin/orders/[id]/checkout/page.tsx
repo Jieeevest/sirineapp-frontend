@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Swal from "sweetalert2";
-import { ArrowLeft, Download, MessageCircle, Save } from "lucide-react";
+import { ArrowLeft, Download, Save } from "lucide-react";
 import { useGetOrderByIdQuery, useUpdateOrderMutation } from "@/services/api";
 
 export default function CheckoutPage() {
@@ -45,6 +45,8 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (data) {
       setCheckoutData({
+        name: data.order.user.name || "",
+        email: data.order.user.email || "",
         address: data.order.address || "",
         status: data.order.status || "",
         evidence: data.order.evidence || "",
@@ -59,6 +61,16 @@ export default function CheckoutPage() {
     const { name, value } = e.target;
     setCheckoutData((prev: any) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const sendWhatsAppMessage = () => {
+    const customer = data?.order.user;
+    const adminPhoneNumber = customer?.phoneNumber;
+    const message = `Halo ${customer?.name}, kami telah menerima pesanan Anda dan sedang diproses. Mohon tunggu bahwa pesanan Anda akan segera dikirim. Terima kasih.`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${adminPhoneNumber}?text=${encodedMessage}`;
+    window.open(whatsappUrl, "_blank");
   };
 
   const handleCheckout = async (e: React.FormEvent) => {
@@ -76,16 +88,17 @@ export default function CheckoutPage() {
 
     try {
       const formData = new FormData();
-      formData.append("address", checkoutData.address);
-      formData.append("status", "paid");
+      const evidenceData = checkoutData.evidence; // Data dari database (object number)
+      const mimeType = "image/jpeg"; // Sesuaikan dengan tipe gambar
 
-      // Pastikan evidence bukan null sebelum ditambahkan ke FormData
-      if (checkoutData.evidence instanceof File) {
-        formData.append("evidence", checkoutData.evidence);
-      } else {
-        console.error("Invalid file type!");
-        return;
-      }
+      // Konversi object number ke Uint8Array
+      const byteArray = new Uint8Array(Object.values(evidenceData));
+      const blobImage = new Blob([byteArray], { type: mimeType });
+
+      formData.append("address", checkoutData.address);
+      formData.append("status", "on delivery");
+
+      formData.append("evidence", blobImage);
 
       await checkout({ id: Number(id), updatedOrder: formData })
         .unwrap()
@@ -93,31 +106,18 @@ export default function CheckoutPage() {
           const result = await Swal.fire({
             icon: "success",
             title: "Success!",
-            text: "Checkout completed successfully!",
+            text: "Verification successfully!",
             confirmButtonText: "OK",
           });
 
           if (result.isConfirmed) {
+            sendWhatsAppMessage();
             router.push("/customer/orders");
           }
         });
     } catch (error) {
       console.error("Checkout failed:", error);
     }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) {
-      console.warn("No file selected");
-      return;
-    }
-
-    const file = e.target.files[0];
-
-    setCheckoutData((prev: any) => {
-      const newData = { ...prev, evidence: file };
-      return newData;
-    });
   };
 
   const handleDownload = () => {
@@ -145,17 +145,6 @@ export default function CheckoutPage() {
     }
   };
 
-  const sendWhatsAppMessage = () => {
-    const customer = data?.order.user;
-    // const customerPhoneNumber = customer?.phoneNumber;
-    const adminPhoneNumber = "+6282121260049";
-    const message = `Halo Super Admin, saya ${customer?.name} dengan email ${customer?.email} ingin bertanya mengenai pesanan saya. Terima kasih.`;
-
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${adminPhoneNumber}?text=${encodedMessage}`;
-    window.open(whatsappUrl, "_blank");
-  };
-
   return (
     <div className="flex min-h-screen w-full flex-col p-4">
       <h1 className="text-2xl font-semibold mb-4">Checkout</h1>
@@ -166,30 +155,18 @@ export default function CheckoutPage() {
             <p className="text-sm text-gray-900 font-semibold">
               Please fill in the form below to complete your purchase.
             </p>
-            <div className="flex justify-end gap-2">
-              <Button
-                type="reset"
-                variant="outline"
-                size="sm"
-                className="border-[1px] border-gray-400"
-                onClick={() => sendWhatsAppMessage()}
-              >
-                <MessageCircle className="w-5 h-5 " />
-                Chat Admin
-              </Button>
-              <div
-                className={`flex items-center text-sm justify-center rounded-md border-[1px] shadow-md text-white p-1 w-32 px-2 ${
-                  checkoutData.status == "pending"
-                    ? "bg-red-500"
-                    : checkoutData.status == "paid"
-                    ? "bg-green-500"
-                    : "bg-blue-500"
-                } "`}
-              >
-                {checkoutData.status.charAt(0).toUpperCase() +
-                  checkoutData.status.slice(1)}{" "}
-                {checkoutData.status == "pending" && "Payment"}
-              </div>
+            <div
+              className={`flex items-center text-sm justify-center rounded-md border-[1px] shadow-md text-white p-1 min-w-20 px-5 py-2 ${
+                checkoutData.status == "pending"
+                  ? "bg-red-500"
+                  : checkoutData.status == "paid"
+                  ? "bg-green-500"
+                  : "bg-blue-500"
+              } "`}
+            >
+              {checkoutData.status.charAt(0).toUpperCase() +
+                checkoutData.status.slice(1)}{" "}
+              {checkoutData.status == "pending" && "Payment"}
             </div>
           </div>
         </CardHeader>
@@ -243,7 +220,7 @@ export default function CheckoutPage() {
               <h2 className="text-lg font-semibold mb-4">
                 Payment Information
               </h2>
-              <form onSubmit={handleCheckout} className="space-y-4">
+              <form className="space-y-4">
                 <div className="space-y-1">
                   <label htmlFor="name" className="text-sm font-medium">
                     Your Name
@@ -280,38 +257,15 @@ export default function CheckoutPage() {
                   <Textarea
                     id="address"
                     name="address"
-                    value={checkoutData.address}
+                    value={checkoutData.address || "-"}
                     onChange={handleChange}
                     placeholder="Enter your address"
-                    disabled={Boolean(checkoutData.status !== "pending")}
+                    disabled={true}
                     rows={3}
                   />
                   {errors.address && (
                     <p className="text-red-500 text-sm">{errors.address}</p>
                   )}
-                </div>
-
-                <div className="space-y-1">
-                  <label
-                    htmlFor="paymentMethod"
-                    className="text-sm font-normal"
-                  >
-                    Please transfer the amount to the following account: <br />
-                    <span className="font-semibold">
-                      BANK CENTRAL ASIA (BCA) 1234567890 a/n Sirine App. <br />
-                      Rp{" "}
-                      {orderItems
-                        .reduce(
-                          (acc: number, item: any) =>
-                            acc + item.product.price * item.quantity,
-                          0
-                        )
-                        .toLocaleString("id-ID")}{" "}
-                      <br />
-                    </span>
-                    Please include your name in the memo and upload evidence of
-                    the transfer below.
-                  </label>
                 </div>
 
                 <div className="flex flex-col">
@@ -321,40 +275,19 @@ export default function CheckoutPage() {
                   >
                     Evidence<span className="text-red-500">*</span>
                   </label>
-                  {checkoutData.status !== "pending" && (
-                    <Button
-                      type="submit"
-                      variant="outline"
-                      size="lg"
-                      className="border-[1px] border-gray-400"
-                      onClick={handleDownload}
-                    >
-                      <Download className="w-5 h-5 " />
-                      Download Evidence
-                    </Button>
-                  )}
-                  {checkoutData.status == "pending" && (
-                    <>
-                      <input
-                        id="image"
-                        type="file"
-                        accept="image/*"
-                        className="w-full border border-gray-300 rounded-lg p-2 text-sm text-gray-700 
-               file:bg-gray-100 file:border-0 file:py-2 file:px-4 file:rounded-lg
-               hover:file:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-900"
-                        onChange={handleFileChange}
-                        disabled={Boolean(checkoutData.status !== "pending")}
-                      />
-                      {errors.evidence && (
-                        <p className="text-red-500 text-sm">
-                          {errors.evidence}
-                        </p>
-                      )}
-                    </>
-                  )}
-                </div>
 
-                {checkoutData.status == "pending" && (
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="border-[1px] border-gray-400 cursor-pointer hover:bg-gray-100"
+                    onClick={handleDownload}
+                    disabled={Boolean(checkoutData.status == "pending")}
+                  >
+                    <Download className="w-5 h-5 " />
+                    Download Evidence
+                  </Button>
+                </div>
+                {checkoutData.status == "paid" && (
                   <div className="flex justify-end gap-2">
                     <Button
                       type="reset"
@@ -366,9 +299,13 @@ export default function CheckoutPage() {
                       <ArrowLeft className="w-5 h-5 " />
                       Cancel
                     </Button>
-                    <Button type="submit" variant="default" size="lg">
+                    <Button
+                      onClick={handleCheckout}
+                      variant="default"
+                      size="lg"
+                    >
                       <Save className="w-5 h-5 " />
-                      Confirm Payment
+                      Verified Payment
                     </Button>
                   </div>
                 )}

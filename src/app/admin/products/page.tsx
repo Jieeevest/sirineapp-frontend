@@ -27,7 +27,7 @@ import {
   useGetProductsQuery,
   useDeleteProductMutation,
 } from "../../../services/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Pagination,
@@ -41,13 +41,17 @@ import Swal from "sweetalert2";
 
 export default function Products() {
   const router = useRouter();
-  const { data: products } = useGetProductsQuery();
+  const { data: products, refetch } = useGetProductsQuery();
   const [deleteProduct] = useDeleteProductMutation();
 
   // State for pagination and search
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; // Set how many items per page
+
+  useEffect(() => {
+    refetch();
+  }, [products, refetch]);
 
   const handleAddProduct = () => {
     router.push("/admin/products/create");
