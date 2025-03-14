@@ -10,10 +10,12 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Swal from "sweetalert2";
 import { ArrowLeft, Download, Save } from "lucide-react";
 import { useGetOrderByIdQuery, useUpdateOrderMutation } from "@/services/api";
+import Loading from "@/components/atoms/Loading";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { id } = useParams(); // Assuming dynamic routing
+  const { id } = useParams();
+  const [loading, setLoading] = useState(false);
   const user = {
     name: localStorage?.getItem("userName"),
     email: localStorage?.getItem("userEmail"),
@@ -40,7 +42,7 @@ export default function CheckoutPage() {
     evidence: "",
   });
 
-  const { data } = useGetOrderByIdQuery(Number(id));
+  const { data, isLoading } = useGetOrderByIdQuery(Number(id));
 
   useEffect(() => {
     if (data) {
@@ -100,9 +102,11 @@ export default function CheckoutPage() {
 
       formData.append("evidence", blobImage);
 
+      setLoading(true);
       await checkout({ id: Number(id), updatedOrder: formData })
         .unwrap()
         .then(async () => {
+          setLoading(false);
           const result = await Swal.fire({
             icon: "success",
             title: "Success!",
@@ -116,6 +120,7 @@ export default function CheckoutPage() {
           }
         });
     } catch (error) {
+      setLoading(false);
       console.error("Checkout failed:", error);
     }
   };
@@ -144,6 +149,10 @@ export default function CheckoutPage() {
       console.error("Invalid image data:", evidenceData);
     }
   };
+
+  if (isLoading || loading) {
+    return <Loading />;
+  }
 
   return (
     <div className="flex min-h-screen w-full flex-col p-4">

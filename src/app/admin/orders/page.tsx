@@ -20,10 +20,12 @@ import { useEffect, useState } from "react";
 import { formatCurrency } from "@/helpers/formatCurrency";
 import { formatDate } from "@/helpers";
 import { useRouter } from "next/navigation";
+import Loading from "@/components/atoms/Loading";
 
 export default function OrdersOverview() {
   const router = useRouter();
-  const { data: orders, refetch } = useGetOrdersQuery();
+  const [loading, setLoading] = useState(false);
+  const { data: orders, refetch, isLoading } = useGetOrdersQuery();
 
   useEffect(() => {
     refetch();
@@ -57,6 +59,10 @@ export default function OrdersOverview() {
   const totalPages = Math.ceil(
     (filteredOrders?.length ? filteredOrders?.length : 0) / itemsPerPage
   );
+
+  if (isLoading || loading) {
+    return <Loading />;
+  }
 
   return (
     <div className="flex min-h-screen w-full min-w-[1000px] flex-col">
@@ -134,6 +140,7 @@ export default function OrdersOverview() {
                       key={order.id}
                       className="cursor-pointer"
                       onClick={() => {
+                        setLoading(true);
                         router.push(`/admin/orders/${order.id}/checkout`);
                       }}
                     >
