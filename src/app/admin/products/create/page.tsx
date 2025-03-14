@@ -133,7 +133,7 @@ export default function AddProduct() {
       formData.append("description", description);
       // formData.append("price", parseFloat(price));
       // formData.append("stock", parseInt(stock, 10));
-      formData.append("price", String(price));
+      formData.append("price", String(parseFloat(price)));
       formData.append("stock", String(stock));
       formData.append("categoryId", String(categoryId));
       formData.append("isPublic", String(isPublic));

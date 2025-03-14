@@ -86,7 +86,6 @@ export default function UpdateProduct() {
     console.log(file);
     setProduct((prev) => ({ ...prev, image: file }));
   };
-  console.log(product.image);
   const handleUpdateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     const { name, description, price, stock, categoryId, image, isPublic } =
@@ -129,7 +128,7 @@ export default function UpdateProduct() {
       formData.append("description", description);
       // formData.append("price", parseFloat(price));
       // formData.append("stock", parseInt(stock, 10));
-      formData.append("price", String(price));
+      formData.append("price", String(parseFloat(price)));
       formData.append("stock", String(stock));
       formData.append("categoryId", String(categoryId));
       formData.append("isPublic", String(isPublic));
