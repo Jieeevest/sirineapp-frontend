@@ -101,6 +101,8 @@ export default function SirineSaleLanding() {
       return;
     }
 
+    setIsCartOpen(false);
+
     try {
       Swal.fire({
         title: "Are you sure?",
@@ -131,7 +133,7 @@ export default function SirineSaleLanding() {
             router.push("/customer/orders");
           }
         } else if (res.isDismissed) {
-          console.log("Logout cancelled.");
+          setIsCartOpen(true);
         }
       });
     } catch (err: any) {

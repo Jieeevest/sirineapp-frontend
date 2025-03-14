@@ -12,7 +12,7 @@ interface ApiResponse<T> {
 interface Product {
   id: number;
   name: string;
-  description?: string;
+  description: string;
   price: number;
   stock: number;
   image?: File | null;
@@ -146,7 +146,7 @@ export const api = createApi({
       query: (id) => `/products/${id}`,
       transformResponse: (response: ApiResponse<Product>) => response.data,
     }),
-    createProduct: builder.mutation<Product, Partial<Product>>({
+    createProduct: builder.mutation<Product, any>({
       query: (newProduct) => ({
         url: "/products",
         method: "POST",
@@ -155,7 +155,7 @@ export const api = createApi({
     }),
     updateProduct: builder.mutation<
       Product,
-      { id: number; updatedProduct: Partial<Product> }
+      { id: number; updatedProduct: any }
     >({
       query: ({ id, updatedProduct }) => ({
         url: `/products/${id}`,

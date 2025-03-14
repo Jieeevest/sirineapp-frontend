@@ -27,7 +27,7 @@ import {
 interface Product {
   id: number;
   name: string;
-  description?: string;
+  description: string;
   price: string;
   stock: string;
   categoryId: number;
@@ -38,9 +38,9 @@ interface Product {
 export default function UpdateProduct() {
   const router = useRouter();
   const { id } = useParams();
-  const [updateProduct] = useUpdateProductMutation();
 
-  // Use the new useGetProductByIdQuery hook
+  const [loading, setLoading] = useState(false);
+  const [updateProduct] = useUpdateProductMutation();
   const { data: productData, isLoading } = useGetProductByIdQuery(Number(id));
 
   const [product, setProduct] = useState<Product>({
@@ -109,22 +109,35 @@ export default function UpdateProduct() {
 
     setErrors(newErrors);
 
-    if (Object.keys(newErrors).length > 0) return; // If there are errors, do not submit
-
-    const updatedProduct = {
-      name,
-      description,
-      price: parseFloat(price),
-      stock: parseInt(stock, 10),
-      categoryId,
-      image,
-      isPublic: isPublic,
-    };
+    if (Object.keys(newErrors).length > 0) return;
 
     try {
+      const formData = new FormData();
+
+      const evidenceData = image;
+      const mimeType = "image/jpeg";
+
+      if (evidenceData) {
+        // Pastikan evidenceData tidak null
+        // Konversi File ke Blob
+        const byteArray = new Uint8Array(await evidenceData.arrayBuffer()); // Menggunakan arrayBuffer()
+        const blobImage = new Blob([byteArray], { type: mimeType });
+        formData.append("image", blobImage);
+      }
+
+      formData.append("name", name);
+      formData.append("description", description);
+      // formData.append("price", parseFloat(price));
+      // formData.append("stock", parseInt(stock, 10));
+      formData.append("price", String(price));
+      formData.append("stock", String(stock));
+      formData.append("categoryId", String(categoryId));
+      formData.append("isPublic", String(isPublic));
+
+      setLoading(true);
       await updateProduct({
         id: product.id,
-        updatedProduct: { ...updatedProduct },
+        updatedProduct: formData,
       })
         .unwrap()
         .then(async () => {
@@ -146,8 +159,7 @@ export default function UpdateProduct() {
     }
   };
 
-  if (isLoading) return <Loading />;
-  //   if (error) return <p>Error fetching product details!</p>;
+  if (isLoading || loading) return <Loading />;
 
   return (
     <div className="flex min-h-screen w-full min-w-[1000px] flex-col px-8 pt-4">

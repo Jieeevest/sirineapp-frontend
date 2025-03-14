@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import Loading from "@/components/atoms/Loading";
 
 // Define types for product
 interface Product {
@@ -29,6 +30,7 @@ interface Product {
   stock: string;
   categoryId: number;
   image: File | null;
+  isPublic: boolean;
 }
 
 export default function AddProduct() {
@@ -41,6 +43,7 @@ export default function AddProduct() {
     stock: "",
     categoryId: 0,
     image: null,
+    isPublic: false,
   });
 
   const [errors, setErrors] = useState<{
@@ -59,7 +62,8 @@ export default function AddProduct() {
     category: "",
   });
 
-  const { data: categories } = useGetCategoriesQuery();
+  const [loading, setLoading] = useState(false);
+  const { data: categories, isLoading } = useGetCategoriesQuery();
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
@@ -88,7 +92,8 @@ export default function AddProduct() {
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { name, description, price, stock, image, categoryId } = product;
+    const { name, description, price, stock, image, categoryId, isPublic } =
+      product;
 
     // Simple validation for empty fields
     const newErrors: {
@@ -108,17 +113,33 @@ export default function AddProduct() {
 
     setErrors(newErrors);
 
-    if (Object.keys(newErrors).length > 0) return; // If there are errors, do not submit
-
-    const newProduct = {
-      name,
-      description,
-      price: parseFloat(price),
-      stock: parseInt(stock, 10),
-    };
+    if (Object.keys(newErrors).length > 0) return;
 
     try {
-      await createProduct(newProduct)
+      const formData = new FormData();
+
+      const evidenceData = image; // Data dari database (object number)
+      const mimeType = "image/jpeg"; // Sesuaikan dengan tipe gambar
+
+      if (evidenceData) {
+        // Pastikan evidenceData tidak null
+        // Konversi File ke Blob
+        const byteArray = new Uint8Array(await evidenceData.arrayBuffer()); // Menggunakan arrayBuffer()
+        const blobImage = new Blob([byteArray], { type: mimeType });
+        formData.append("image", blobImage);
+      }
+
+      formData.append("name", name);
+      formData.append("description", description);
+      // formData.append("price", parseFloat(price));
+      // formData.append("stock", parseInt(stock, 10));
+      formData.append("price", String(price));
+      formData.append("stock", String(stock));
+      formData.append("categoryId", String(categoryId));
+      formData.append("isPublic", String(isPublic));
+
+      setLoading(true);
+      await createProduct(formData)
         .unwrap()
         .then(async () => {
           // Display the success alert and wait for the user to click "OK"
@@ -131,13 +152,17 @@ export default function AddProduct() {
 
           // Redirect only if the user confirms the alert
           if (result.isConfirmed) {
+            setLoading(false);
             router.push("/admin/products");
           }
         });
     } catch (error) {
+      setLoading(false);
       console.error("Failed to add product:", error);
     }
   };
+
+  if (loading || isLoading) return <Loading />;
 
   return (
     <div className="flex min-h-screen w-full min-w-[1000px] flex-col px-8 pt-4">
@@ -271,9 +296,9 @@ export default function AddProduct() {
                   name="description"
                   checked={Boolean(product.description)}
                   onCheckedChange={(checked: any) =>
-                    setProduct((prev) => ({
+                    setProduct((prev: any) => ({
                       ...prev,
-                      description: checked ? "true" : "false",
+                      isPublic: checked ? "true" : "false",
                     }))
                   }
                 />
