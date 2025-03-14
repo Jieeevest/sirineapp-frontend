@@ -45,6 +45,8 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (data) {
       setCheckoutData({
+        name: data.order.user.name || "",
+        email: data.order.user.email || "",
         address: data.order.address || "",
         status: data.order.status || "",
         evidence: data.order.evidence || "",
@@ -323,7 +325,7 @@ export default function CheckoutPage() {
                   </label>
                   {checkoutData.status !== "pending" && (
                     <Button
-                      type="submit"
+                      type="button"
                       variant="outline"
                       size="lg"
                       className="border-[1px] border-gray-400"
@@ -366,7 +368,11 @@ export default function CheckoutPage() {
                       <ArrowLeft className="w-5 h-5 " />
                       Cancel
                     </Button>
-                    <Button type="submit" variant="default" size="lg">
+                    <Button
+                      onClick={handleCheckout}
+                      variant="default"
+                      size="lg"
+                    >
                       <Save className="w-5 h-5 " />
                       Confirm Payment
                     </Button>

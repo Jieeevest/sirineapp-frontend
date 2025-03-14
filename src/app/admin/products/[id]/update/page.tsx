@@ -24,16 +24,16 @@ import {
 } from "@/components/ui/select";
 
 // Define types for product
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: string;
-  stock: string;
-  categoryId: number;
-  image: File | null;
-  isPublic: boolean;
-}
+// interface Product {
+//   id: number;
+//   name: string;
+//   description: string;
+//   price: string;
+//   stock: string;
+//   categoryId: number;
+//   image: File | null;
+//   isPublic: boolean;
+// }
 
 export default function UpdateProduct() {
   const router = useRouter();
@@ -43,7 +43,7 @@ export default function UpdateProduct() {
   const [updateProduct] = useUpdateProductMutation();
   const { data: productData, isLoading } = useGetProductByIdQuery(Number(id));
 
-  const [product, setProduct] = useState<Product>({
+  const [product, setProduct] = useState<any>({
     id: 0,
     name: "",
     description: "",
@@ -65,7 +65,7 @@ export default function UpdateProduct() {
         price: productData.price.toString(),
         stock: productData.stock.toString(),
         categoryId: productData.categoryId,
-        image: productData.image ? productData.image : null,
+        image: productData.image || "",
         isPublic: productData.isPublic,
       });
     }
@@ -76,7 +76,7 @@ export default function UpdateProduct() {
   const handleChange = (e: any) => {
     const { name, value } = e.target;
 
-    setProduct((prev) => {
+    setProduct((prev: any) => {
       let newValue = value;
 
       // Format khusus jika input adalah "price"
@@ -96,7 +96,7 @@ export default function UpdateProduct() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     console.log(file);
-    setProduct((prev) => ({ ...prev, image: file }));
+    setProduct((prev: any) => ({ ...prev, image: file }));
   };
   const handleUpdateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -218,6 +218,7 @@ export default function UpdateProduct() {
                 accept="image/*"
                 className="border border-gray-300 rounded-md p-2 hover:border-gray-900"
                 onChange={handleFileChange}
+                value={product.image || ""}
               />
               {errors.image && (
                 <p className="text-red-500 text-sm">{errors.image}</p>
@@ -273,7 +274,10 @@ export default function UpdateProduct() {
                   product.categoryId ? String(product.categoryId) : "-1"
                 }
                 onValueChange={(value) =>
-                  setProduct((prev) => ({ ...prev, categoryId: Number(value) }))
+                  setProduct((prev: any) => ({
+                    ...prev,
+                    categoryId: Number(value),
+                  }))
                 }
               >
                 <SelectTrigger className="w-full mt-2 p-2 border rounded-md text-sm">
