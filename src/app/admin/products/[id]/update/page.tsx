@@ -73,12 +73,24 @@ export default function UpdateProduct() {
 
   const { data: categories } = useGetCategoriesQuery();
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: any) => {
     const { name, value } = e.target;
-    setProduct((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev: any) => ({ ...prev, [name]: "" })); // Reset error on change
+
+    setProduct((prev) => {
+      let newValue = value;
+
+      // Format khusus jika input adalah "price"
+      if (name === "price" || name === "stock") {
+        const rawValue = value.replace(/\D/g, ""); // Hanya angka
+        newValue = rawValue
+          ? new Intl.NumberFormat("id-ID").format(Number(rawValue))
+          : "";
+      }
+
+      return { ...prev, [name]: newValue };
+    });
+
+    setErrors((prev: any) => ({ ...prev, [name]: "" })); // Reset error saat input berubah
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -311,7 +323,7 @@ export default function UpdateProduct() {
                 id="price"
                 name="price"
                 type="text"
-                value={product.price}
+                value={String(parseFloat(product.price))}
                 onChange={handleChange}
                 placeholder="0"
                 className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
