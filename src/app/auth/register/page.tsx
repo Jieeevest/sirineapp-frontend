@@ -15,17 +15,20 @@ export default function Register() {
     email: "",
     password: "",
     confirmPassword: "",
+    phoneNumber: "",
   });
   const [error, setError] = useState<{
     fullName: string;
     email: string;
     password: string;
     confirmPassword: string;
+    phoneNumber: string;
   }>({
     fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
+    phoneNumber: "",
   });
   const [loading, setLoading] = useState(false);
   const [register] = useRegisterMutation();
@@ -43,6 +46,7 @@ export default function Register() {
       confirmPassword: payload.confirmPassword
         ? ""
         : "Confirm password is required",
+      phoneNumber: payload.phoneNumber ? "" : "Phone number is required",
     };
     setError(newErrors);
     return Object.values(newErrors).every((error) => error === "");
@@ -62,6 +66,7 @@ export default function Register() {
         name: payload.fullName,
         email: payload.email,
         password: payload.password,
+        phoneNumber: payload.phoneNumber,
       };
       await register(objectPayload)
         .unwrap()
@@ -169,6 +174,25 @@ export default function Register() {
               />
               {error && (
                 <p className="text-red-500 text-sm">{error.confirmPassword}</p>
+              )}
+            </div>
+            <div className="space-y-1">
+              <label
+                htmlFor="email"
+                className="text-sm font-medium text-gray-700"
+              >
+                Phone Number<span className="text-red-500">*</span>
+              </label>
+              <Input
+                id="phoneNumber"
+                type="text"
+                value={payload.phoneNumber}
+                onChange={(e) => handleChange("phoneNumber", e.target.value)}
+                placeholder="Enter your phone number"
+                className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
+              />
+              {error && (
+                <p className="text-red-500 text-sm">{error.phoneNumber}</p>
               )}
             </div>
             <div className="flex justify-center mt-4">
