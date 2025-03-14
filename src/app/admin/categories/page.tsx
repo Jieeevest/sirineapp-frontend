@@ -37,10 +37,12 @@ import {
   PaginationLink,
 } from "@/components/ui/pagination";
 import Swal from "sweetalert2";
+import Loading from "@/components/atoms/Loading";
 
 export default function Categories() {
   const router = useRouter();
-  const { data: categories, refetch } = useGetCategoriesQuery();
+  const [loading, setLoading] = useState(false);
+  const { data: categories, refetch, isLoading } = useGetCategoriesQuery();
   const [deleteCategory] = useDeleteCategoryMutation();
 
   // State for pagination and search
@@ -54,11 +56,13 @@ export default function Categories() {
 
   // Handle adding a new category
   const handleAdd = () => {
+    setLoading(true);
     router.push("/admin/categories/create");
   };
 
   // Handle updating a category
   const handleUpdate = (id: number) => {
+    setLoading(true);
     router.push(`/admin/categories/${id}/update`);
   };
 
@@ -74,6 +78,7 @@ export default function Categories() {
       reverseButtons: true,
     }).then(async (result) => {
       if (result.isConfirmed) {
+        setLoading(true);
         await deleteCategory(id).then(async () => {
           const result = await Swal.fire({
             icon: "success",
@@ -82,11 +87,13 @@ export default function Categories() {
             confirmButtonText: "OK",
           });
           if (result.isConfirmed) {
-            router.push("/admin/categories");
+            setLoading(false);
+            refetch();
           }
         });
       } else if (result.isDismissed) {
-        console.log("Logout cancelled.");
+        setLoading(false);
+        console.log("Delete cancelled.");
       }
     });
   };
@@ -119,6 +126,10 @@ export default function Categories() {
   const totalPages = Math.ceil(
     (filteredCategories?.length ? filteredCategories?.length : 0) / itemsPerPage
   );
+
+  if (isLoading || loading) {
+    return <Loading />;
+  }
 
   return (
     <div className="flex min-h-screen w-full min-w-[1000px] flex-col">
