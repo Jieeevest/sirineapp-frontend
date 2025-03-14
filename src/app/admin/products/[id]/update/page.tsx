@@ -323,7 +323,7 @@ export default function UpdateProduct() {
                 id="price"
                 name="price"
                 type="text"
-                value={String(parseFloat(product.price))}
+                value={product.price}
                 onChange={handleChange}
                 placeholder="0"
                 className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
