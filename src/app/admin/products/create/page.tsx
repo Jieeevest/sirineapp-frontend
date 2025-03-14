@@ -294,7 +294,7 @@ export default function AddProduct() {
                 <Switch
                   id="description"
                   name="description"
-                  checked={Boolean(product.description)}
+                  checked={Boolean(product.isPublic)}
                   onCheckedChange={(checked: any) =>
                     setProduct((prev: any) => ({
                       ...prev,
