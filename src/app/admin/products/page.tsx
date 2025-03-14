@@ -38,10 +38,12 @@ import {
 import { formatCurrency } from "@/helpers/formatCurrency";
 import { Badge } from "@/components/ui/badge";
 import Swal from "sweetalert2";
+import Loading from "@/components/atoms/Loading";
 
 export default function Products() {
   const router = useRouter();
-  const { data: products, refetch } = useGetProductsQuery();
+  const [loading, setLoading] = useState(false);
+  const { data: products, refetch, isLoading } = useGetProductsQuery();
   const [deleteProduct] = useDeleteProductMutation();
 
   // State for pagination and search
@@ -54,10 +56,12 @@ export default function Products() {
   }, [products, refetch]);
 
   const handleAddProduct = () => {
+    setLoading(true);
     router.push("/admin/products/create");
   };
 
   const handleUpdateProduct = (id: number) => {
+    setLoading(true);
     router.push(`/admin/products/${id}/update`);
   };
 
@@ -72,6 +76,7 @@ export default function Products() {
       reverseButtons: true,
     }).then(async (result) => {
       if (result.isConfirmed) {
+        setLoading(true);
         await deleteProduct(id).then(async () => {
           const result = await Swal.fire({
             icon: "success",
@@ -80,11 +85,13 @@ export default function Products() {
             confirmButtonText: "OK",
           });
           if (result.isConfirmed) {
-            router.push("/admin/products");
+            setLoading(false);
+            refetch();
           }
         });
       } else if (result.isDismissed) {
-        console.log("Logout cancelled.");
+        setLoading(false);
+        console.log("Delete cancelled.");
       }
     });
   };
@@ -117,6 +124,8 @@ export default function Products() {
   const totalPages = Math.ceil(
     (filteredProducts?.length ? filteredProducts?.length : 0) / itemsPerPage
   );
+
+  if (isLoading || loading) return <Loading />;
 
   return (
     <div className="flex min-h-screen w-full min-w-[1000px] flex-col">

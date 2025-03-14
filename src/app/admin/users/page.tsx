@@ -34,10 +34,12 @@ import {
 } from "@/components/ui/pagination";
 import { formatDate } from "@/helpers";
 import Swal from "sweetalert2";
+import Loading from "@/components/atoms/Loading";
 
 export default function Users() {
   const router = useRouter();
-  const { data: users, refetch } = useGetUsersQuery();
+  const [loading, setLoading] = useState(false);
+  const { data: users, refetch, isLoading } = useGetUsersQuery();
   const [deleteUser] = useDeleteUserMutation();
 
   // State for pagination and search
@@ -50,10 +52,12 @@ export default function Users() {
   }, [users, refetch]);
 
   const handleAddUser = () => {
+    setLoading(true);
     router.push("/admin/users/create");
   };
 
   const handleUpdateUser = (id: number) => {
+    setLoading(true);
     router.push(`/admin/users/${id}/update`);
   };
 
@@ -68,6 +72,7 @@ export default function Users() {
       reverseButtons: true,
     }).then(async (result) => {
       if (result.isConfirmed) {
+        setLoading(true);
         await deleteUser(id).then(async () => {
           const result = await Swal.fire({
             icon: "success",
@@ -76,11 +81,13 @@ export default function Users() {
             confirmButtonText: "OK",
           });
           if (result.isConfirmed) {
-            router.push("/admin/users");
+            setLoading(false);
+            refetch();
           }
         });
       } else if (result.isDismissed) {
-        console.log("Logout cancelled.");
+        setLoading(false);
+        console.log("Delete cancelled.");
       }
     });
   };
@@ -111,6 +118,7 @@ export default function Users() {
     (filteredUsers?.length ? filteredUsers?.length : 0) / itemsPerPage
   );
 
+  if (loading || isLoading) return <Loading />;
   return (
     <div className="flex min-h-screen w-full min-w-[1000px] flex-col">
       <main className="flex flex-1 flex-col gap-4 p-4 md:p-8">
