@@ -287,7 +287,7 @@ export default function SirineSaleLanding() {
                     "2px 2px 4px rgba(0, 0, 0, 0.3), 0 0 25px rgba(0, 0, 0, 0.3), 0 0 50px rgba(0, 0, 0, 0.3)",
                 }}
               >
-                Gudang Sirine
+                GUDANG SIRINE
               </a>
             </div>
 
@@ -428,7 +428,7 @@ export default function SirineSaleLanding() {
                 "3px 3px 5px rgba(0, 0, 0, 0.3), 0 0 25px rgba(0, 0, 0, 0.3), 0 0 50px rgba(0, 0, 0, 0.3)",
             }}
           >
-            Sirine Fragrances
+            Gudang Sirine
           </h1>
           <p
             className="text-xl md:text-2xl text-white mb-10 md:mb-12"
@@ -436,7 +436,7 @@ export default function SirineSaleLanding() {
               textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
             }}
           >
-            Discover the essence of elegance with our exclusive fragrances
+            Pusat Sirine Strobo Equipment
           </p>
         </div>
       </section>
@@ -621,7 +621,7 @@ export default function SirineSaleLanding() {
       <footer className="bg-black text-white py-8">
         <Container className="text-center">
           <p className="text-sm">
-            &copy; 2025 Sirine Fragrances. All rights reserved.
+            &copy; 2025 GUDANG SIRINE. All rights reserved.
           </p>
         </Container>
       </footer>
