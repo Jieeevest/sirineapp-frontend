@@ -95,9 +95,9 @@ export default function UpdateProduct() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    console.log(file);
     setProduct((prev: any) => ({ ...prev, image: file }));
   };
+
   const handleUpdateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     const { name, description, price, stock, categoryId, image, isPublic } =
@@ -218,7 +218,7 @@ export default function UpdateProduct() {
                 accept="image/*"
                 className="border border-gray-300 rounded-md p-2 hover:border-gray-900"
                 onChange={handleFileChange}
-                value={product.image || ""}
+                // value={product.image ? product.image : ""}
               />
               {errors.image && (
                 <p className="text-red-500 text-sm">{errors.image}</p>
