@@ -49,6 +49,15 @@ const user = {
   avatar: "/avatars/shadcn.jpg",
 };
 
+function convertBinaryImageToDataURL(
+  imageData: { [key: string]: number },
+  mimeType = "image/png"
+): string {
+  const byteArray = new Uint8Array(Object.values(imageData));
+  const blob = new Blob([byteArray], { type: mimeType });
+  return URL.createObjectURL(blob); // ini langsung bisa jadi src untuk <img>
+}
+
 export default function SirineSaleLanding() {
   const router = useRouter();
   const [categories, setCategories] = useState<string[]>([]);
@@ -72,11 +81,19 @@ export default function SirineSaleLanding() {
 
         // Loop through each product in the category and push it to the respective category array
         category.products.forEach((product: any) => {
+          let imageSrc: string;
+
+          if (product.image && typeof product.image === "object") {
+            imageSrc = convertBinaryImageToDataURL(product.image, "image/png");
+          } else {
+            imageSrc = "/notfound.png";
+          }
+
           categorizedProducts[category.name].push({
             id: product.id,
             name: product.name,
             price: String(product.price),
-            image: "/notfound.png",
+            image: imageSrc,
             quantity: product.stock,
           });
         });
