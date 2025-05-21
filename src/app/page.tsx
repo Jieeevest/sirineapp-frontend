@@ -20,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, ShoppingBag, ShoppingCart } from "lucide-react";
+import { LogOut, ShoppingBag, ShoppingCart, Star } from "lucide-react";
 import {
   useCreateOrderMutation,
   useGetPublicCategoriesQuery,
@@ -65,6 +65,8 @@ export default function SirineSaleLanding() {
 
   const { data: categoriesData } = useGetPublicCategoriesQuery();
   const [createOrder, { isLoading }] = useCreateOrderMutation();
+
+  console.log(categoriesData);
 
   useEffect(() => {
     if (categoriesData) {
@@ -535,6 +537,23 @@ export default function SirineSaleLanding() {
                           </span>
                         </span>
                       </p>
+                      <div className="flex items-center justify-start gap-1">
+                        <button
+                          key={1}
+                          type="button"
+                          className={`text-sm text-yellow-400 `}
+                          disabled={true}
+                        >
+                          <Star
+                            fill="currentColor"
+                            size={20}
+                            stroke="currentColor"
+                          />
+                        </button>
+                        <span className="text-gray-500 text-sm font-medium">
+                          3,5
+                        </span>
+                      </div>
                       {user.accessToken && (
                         <Button
                           className="mt-4 w-full bg-gray-800 hover:bg-gray-900 hover:scale-105 text-white"

@@ -8,8 +8,19 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Swal from "sweetalert2";
-import { ArrowLeft, Download, MessageCircle, Save } from "lucide-react";
-import { useGetOrderByIdQuery, useUpdateOrderMutation } from "@/services/api";
+import {
+  ArrowLeft,
+  Check,
+  Download,
+  MessageCircle,
+  Save,
+  Star,
+} from "lucide-react";
+import {
+  useGetOrderByIdQuery,
+  useReviewOrderMutation,
+  useUpdateOrderMutation,
+} from "@/services/api";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -22,6 +33,7 @@ export default function CheckoutPage() {
   };
 
   const [checkout] = useUpdateOrderMutation();
+  const [review] = useReviewOrderMutation();
   const [orderItems, setOrderItems] = useState<any>([]);
   const [checkoutData, setCheckoutData] = useState<any>({
     name: user?.name || "",
@@ -32,6 +44,14 @@ export default function CheckoutPage() {
     status: "",
   });
 
+  const [hovered, setHovered] = useState(0);
+
+  const [reviewData, setReviewData] = useState<any>({
+    rating: 0,
+    isReviewed: false,
+    comments: "",
+  });
+
   const [errors, setErrors] = useState<{
     address: string;
     evidence: string;
@@ -40,7 +60,7 @@ export default function CheckoutPage() {
     evidence: "",
   });
 
-  const { data } = useGetOrderByIdQuery(Number(id));
+  const { data, refetch } = useGetOrderByIdQuery(Number(id));
 
   useEffect(() => {
     if (data) {
@@ -50,6 +70,11 @@ export default function CheckoutPage() {
         address: data.order.address || "",
         status: data.order.status || "",
         evidence: data.order.evidence || "",
+      });
+      setReviewData({
+        rating: data.order.rating || 0,
+        isReviewed: data.order.isReviewed || false,
+        comments: data.order.comments || "",
       });
       setOrderItems(data.orderItems || []);
     }
@@ -61,6 +86,13 @@ export default function CheckoutPage() {
     const { name, value } = e.target;
     setCheckoutData((prev: any) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const handleChangeReview = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setReviewData((prev: any) => ({ ...prev, [name]: value }));
   };
 
   const handleCheckout = async (e: React.FormEvent) => {
@@ -103,8 +135,35 @@ export default function CheckoutPage() {
             router.push("/customer/orders");
           }
         });
+      refetch();
     } catch (error) {
       console.error("Checkout failed:", error);
+    }
+  };
+
+  const handleReview = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const { rating, comments } = reviewData;
+
+    try {
+      review({ id: Number(id), rating, comments })
+        .unwrap()
+        .then(async () => {
+          const result = await Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "Review submitted successfully!",
+            confirmButtonText: "OK",
+          });
+
+          if (result.isConfirmed) {
+            router.push("/customer/orders");
+          }
+        });
+      refetch();
+    } catch (error) {
+      console.error("Review failed:", error);
     }
   };
 
@@ -197,49 +256,124 @@ export default function CheckoutPage() {
         </CardHeader>
         <CardContent>
           <div className="flex justify-between gap-4">
-            <div className="w-1/2 px-8 py-4 border-[1px] rounded-md shadow-sm border-gray-300">
-              <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
+            <div className="w-1/2 border-[1px] rounded-md shadow-sm border-gray-300">
+              <div className="mb-4 h-1/2 px-8 py-4">
+                <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
 
-              <ul className="space-y-4">
-                {orderItems.map((item: any) => (
-                  <li
-                    key={item.id}
-                    className="flex justify-between border-b pb-2"
-                  >
-                    <div className="w-9/12">
-                      <h3 className="text-sm font-medium">
-                        {item.product.name}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        Quantity: {item.quantity} pcs
-                      </p>
-                    </div>
-                    <div className="items-start w-3/12">
-                      <span className="text-sm font-semibold ml-5">
-                        Rp {item.product.price.toLocaleString("id-ID")}
-                      </span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+                <ul className="space-y-4">
+                  {orderItems.map((item: any) => (
+                    <li
+                      key={item.id}
+                      className="flex justify-between border-b pb-2"
+                    >
+                      <div className="w-9/12">
+                        <h3 className="text-sm font-medium">
+                          {item.product.name}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          Quantity: {item.quantity} pcs
+                        </p>
+                      </div>
+                      <div className="items-start w-3/12">
+                        <span className="text-sm font-semibold ml-5">
+                          Rp {item.product.price.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
 
-              <div className="mt-4 flex justify-between font-semibold text-base">
-                <div className="w-9/12">
-                  <span>Total</span>
-                </div>
-                <div className="w-3/12 ">
-                  <span className="ml-5">
-                    Rp{" "}
-                    {orderItems
-                      .reduce(
-                        (acc: number, item: any) =>
-                          acc + item.product.price * item.quantity,
-                        0
-                      )
-                      .toLocaleString("id-ID")}
-                  </span>
+                <div className="mt-4 flex justify-between font-semibold text-base">
+                  <div className="w-9/12">
+                    <span>Total</span>
+                  </div>
+                  <div className="w-3/12 ">
+                    <span className="ml-5">
+                      Rp{" "}
+                      {orderItems
+                        .reduce(
+                          (acc: number, item: any) =>
+                            acc + item.product.price * item.quantity,
+                          0
+                        )
+                        .toLocaleString("id-ID")}
+                    </span>
+                  </div>
                 </div>
               </div>
+              {checkoutData.status == "paid" && (
+                <div className="h-[50%] px-4 border-t-[1px] pt-4  border-gray-300">
+                  <div className="px-4">
+                    <div className="flex justify-between">
+                      <h2 className="text-lg font-semibold mb-4">
+                        Review Order
+                      </h2>
+                      {!reviewData.isReviewed && (
+                        <Button
+                          type="reset"
+                          variant="outline"
+                          size="sm"
+                          className="border-[1px] border-gray-400"
+                          onClick={handleReview}
+                        >
+                          <Check className="w-5 h-5 " />
+                          Submit
+                        </Button>
+                      )}
+                    </div>
+                    <div className="space-y-1 mb-4 ">
+                      <label htmlFor="address" className="text-sm font-medium">
+                        Rating
+                      </label>
+                      <div className="flex items-center space-x-1">
+                        {[1, 2, 3, 4, 5].map((star) => {
+                          const isActive =
+                            star <= (hovered || reviewData.rating);
+
+                          return (
+                            <button
+                              key={star}
+                              type="button"
+                              className={`text-xl transition-colors ${
+                                isActive ? "text-yellow-400" : "text-gray-300 "
+                              }`}
+                              onClick={() =>
+                                setReviewData({
+                                  ...reviewData,
+                                  rating: star,
+                                })
+                              }
+                              onMouseEnter={() =>
+                                !reviewData.isReviewed && setHovered(star)
+                              }
+                              onMouseLeave={() =>
+                                !reviewData.isReviewed && setHovered(0)
+                              }
+                              disabled={reviewData.isReviewed}
+                            >
+                              <Star fill="currentColor" stroke="currentColor" />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label htmlFor="comments" className="text-sm font-medium">
+                        Comments
+                      </label>
+                      <Textarea
+                        id="comments"
+                        name="comments"
+                        value={reviewData.comments}
+                        onChange={handleChangeReview}
+                        placeholder="Enter your comments"
+                        disabled={reviewData.isReviewed}
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="w-1/2 px-8 py-4 border-[1px] rounded-md shadow-sm border-gray-300">
               <h2 className="text-lg font-semibold mb-4">

@@ -60,6 +60,9 @@ interface Order {
   address: string;
   evidence: File;
   status: string;
+  isReviewed: boolean;
+  rating: number;
+  comments: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -309,7 +312,16 @@ export const api = createApi({
         method: "DELETE",
       }),
     }),
-
+    reviewOrder: builder.mutation<
+      Order,
+      { id: number; rating: number; comments: string }
+    >({
+      query: ({ id, rating, comments }) => ({
+        url: `/orders/${id}/review`,
+        method: "PUT",
+        body: { rating, comments },
+      }),
+    }),
     // User Endpoints
     getUsers: builder.query<User[], void>({
       query: () => "/users",
@@ -427,6 +439,7 @@ export const {
   useCreateOrderMutation,
   useUpdateOrderMutation,
   useDeleteOrderMutation,
+  useReviewOrderMutation,
   useGetUsersQuery,
   useGetUserByIdQuery,
   useCreateUserMutation,
