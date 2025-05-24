@@ -13,7 +13,7 @@ COPY package*.json ./
 RUN npm install --force
 
 # Update browserslist (optional, bisa dihapus kalau tidak perlu)
-RUN npx update-browserslist-db@latest
+# RUN npx update-browserslist-db@latest
 
 # Salin semua file proyek
 COPY . .
