@@ -1,30 +1,25 @@
-# Use the official Node 20 base image with a slim variant for small size and efficiency
-FROM --platform=linux/amd64 node:20-alpine
+# Gunakan image slim (lebih stabil daripada alpine)
+FROM node:20-slim
 
-# Set the working directory inside the container
+# Set timezone (opsional tapi disarankan untuk Next.js dan date-fns)
+ENV TZ=Asia/Jakarta
+
 WORKDIR /app
 
-# Copy package.json and package-lock.json files into the container
+# Salin hanya file dependency
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependency dengan cache layer yang efisien
+RUN npm ci
 
-# Update Browserslist database
+# Update browserslist (optional, bisa dihapus kalau tidak perlu)
 RUN npx update-browserslist-db@latest
 
-# Rebuild native Node.js modules
-RUN npm rebuild
-
-# Copy all project files into the container
+# Salin semua file proyek
 COPY . .
 
-# Build the Next.js application
-#RUN npm run build
-
-# Specify the port used by Next.js
+# Port yang digunakan oleh Next.js
 EXPOSE 3030
 
-# Run the application
-#CMD ["npm", "run", "start"]
+# Jalankan development server
 CMD ["npm", "run", "dev"]
