@@ -10,7 +10,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependency dengan cache layer yang efisien
-RUN npm install
+RUN npm install --force
 
 # Update browserslist (optional, bisa dihapus kalau tidak perlu)
 RUN npx update-browserslist-db@latest
