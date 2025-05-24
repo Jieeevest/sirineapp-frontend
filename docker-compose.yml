@@ -9,7 +9,7 @@ services:
       - .env:/app/.env
       - ./src:/app/src
     ports:
-      - "3030:3030"
+      - "3000:3000"
 networks:
   db:
     external: true

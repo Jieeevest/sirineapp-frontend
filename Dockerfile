@@ -19,7 +19,7 @@ RUN npm install --force
 COPY . .
 
 # Port yang digunakan oleh Next.js
-EXPOSE 3030
+EXPOSE 3000
 
 # Jalankan development server
 CMD ["npm", "run", "dev"]
