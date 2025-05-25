@@ -59,6 +59,7 @@ interface Order {
   user: User;
   address: string;
   evidence: File;
+  receipt: File;
   status: string;
   isReviewed: boolean;
   rating: number;
@@ -322,6 +323,16 @@ export const api = createApi({
         body: { rating, comments },
       }),
     }),
+    sendReceiptOrder: builder.mutation<
+      Order,
+      { id: number; updatedOrder: any }
+    >({
+      query: ({ id, updatedOrder }) => ({
+        url: `/orders/${id}/send-receipt`,
+        method: "POST",
+        body: updatedOrder,
+      }),
+    }),
     // User Endpoints
     getUsers: builder.query<User[], void>({
       query: () => "/users",
@@ -440,6 +451,7 @@ export const {
   useUpdateOrderMutation,
   useDeleteOrderMutation,
   useReviewOrderMutation,
+  useSendReceiptOrderMutation,
   useGetUsersQuery,
   useGetUserByIdQuery,
   useCreateUserMutation,

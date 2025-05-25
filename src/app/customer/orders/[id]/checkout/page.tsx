@@ -41,6 +41,7 @@ export default function CheckoutPage() {
     address: "",
     paymentMethod: "",
     evidence: null,
+    receipt: null,
     status: "",
   });
 
@@ -70,6 +71,7 @@ export default function CheckoutPage() {
         address: data.order.address || "",
         status: data.order.status || "",
         evidence: data.order.evidence || "",
+        receipt: data.order.receipt || "",
       });
       setReviewData({
         rating: data.order.rating || 0,
@@ -203,6 +205,31 @@ export default function CheckoutPage() {
       URL.revokeObjectURL(blobUrl);
     } else {
       console.error("Invalid image data:", evidenceData);
+    }
+  };
+
+  const handleDownloadReceipt = () => {
+    const receiptData = checkoutData.receipt; // Data dari database (object number)
+    const mimeType = "image/jpeg"; // Sesuaikan dengan tipe gambar
+
+    if (receiptData && Object.keys(receiptData).length > 0) {
+      // Konversi object number ke Uint8Array
+      const byteArray = new Uint8Array(Object.values(receiptData));
+      const blob = new Blob([byteArray], { type: mimeType });
+
+      // Buat URL Blob untuk unduhan
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `receipt-${Date.now()}-.jpg`; // Sesuaikan dengan nama file
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Hapus URL dari memori setelah digunakan
+      URL.revokeObjectURL(blobUrl);
+    } else {
+      console.error("Invalid image data:", receiptData);
     }
   };
 
@@ -469,6 +496,7 @@ export default function CheckoutPage() {
                       Download Evidence
                     </Button>
                   )}
+
                   {checkoutData.status == "pending" && (
                     <>
                       <input
@@ -487,6 +515,26 @@ export default function CheckoutPage() {
                         </p>
                       )}
                     </>
+                  )}
+                </div>
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="paymentMethod"
+                    className="text-sm font-medium mr-5 mb-1"
+                  >
+                    Receipt
+                  </label>
+                  {checkoutData.status == "on delivery" && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="lg"
+                      className="border-[1px] border-gray-400"
+                      onClick={handleDownloadReceipt}
+                    >
+                      <Download className="w-5 h-5 " />
+                      Download Receipt
+                    </Button>
                   )}
                 </div>
 

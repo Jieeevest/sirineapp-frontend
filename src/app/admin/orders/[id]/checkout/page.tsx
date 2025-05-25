@@ -8,8 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Swal from "sweetalert2";
-import { ArrowLeft, Download, Save } from "lucide-react";
-import { useGetOrderByIdQuery, useUpdateOrderMutation } from "@/services/api";
+import { ArrowLeft, Download, Save, SendHorizonal } from "lucide-react";
+import {
+  useGetOrderByIdQuery,
+  useSendReceiptOrderMutation,
+  useUpdateOrderMutation,
+} from "@/services/api";
 import Loading from "@/components/atoms/Loading";
 
 export default function CheckoutPage() {
@@ -24,6 +28,7 @@ export default function CheckoutPage() {
   };
 
   const [checkout] = useUpdateOrderMutation();
+  const [sendReceipt] = useSendReceiptOrderMutation();
   const [orderItems, setOrderItems] = useState<any>([]);
   const [checkoutData, setCheckoutData] = useState<any>({
     name: user?.name || "",
@@ -31,6 +36,7 @@ export default function CheckoutPage() {
     address: "",
     paymentMethod: "",
     evidence: null,
+    receipt: null,
     status: "",
   });
 
@@ -52,10 +58,25 @@ export default function CheckoutPage() {
         address: data.order.address || "",
         status: data.order.status || "",
         evidence: data.order.evidence || "",
+        receipt: data.order.receipt || "",
       });
       setOrderItems(data.orderItems || []);
     }
   }, [data]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) {
+      console.warn("No file selected");
+      return;
+    }
+
+    const file = e.target.files[0];
+
+    setCheckoutData((prev: any) => {
+      const newData = { ...prev, receipt: file };
+      return newData;
+    });
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -116,12 +137,48 @@ export default function CheckoutPage() {
 
           if (result.isConfirmed) {
             sendWhatsAppMessage();
-            router.push("/customer/orders");
+            router.push("/admin/orders");
           }
         });
     } catch (error) {
       setLoading(false);
       console.error("Checkout failed:", error);
+    }
+  };
+
+  const handleSendReceipt = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const formData = new FormData();
+
+      // Pastikan evidence bukan null sebelum ditambahkan ke FormData
+      if (checkoutData.receipt instanceof File) {
+        formData.append("receipt", checkoutData.receipt);
+      } else {
+        console.error("Invalid file type!");
+        return;
+      }
+
+      setLoading(true);
+      await sendReceipt({ id: Number(id), updatedOrder: formData })
+        .unwrap()
+        .then(async () => {
+          setLoading(false);
+          const result = await Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "Successfully send receipt!",
+            confirmButtonText: "OK",
+          });
+
+          if (result.isConfirmed) {
+            router.push("/admin/orders");
+          }
+        });
+    } catch (error) {
+      setLoading(false);
+      console.error("Send receipt failed:", error);
     }
   };
 
@@ -153,6 +210,8 @@ export default function CheckoutPage() {
   if (isLoading || loading) {
     return <Loading />;
   }
+
+  console.log(checkoutData.receipt);
 
   return (
     <div className="flex min-h-screen w-full flex-col p-4">
@@ -296,6 +355,49 @@ export default function CheckoutPage() {
                     Download Evidence
                   </Button>
                 </div>
+                {checkoutData.status == "on delivery" && (
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="paymentMethod"
+                      className="text-sm font-medium mr-5 mb-1"
+                    >
+                      Receipt<span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex justify-between gap-2">
+                      <div className="flex flex-col w-full gap-1">
+                        <input
+                          id="image"
+                          type="file"
+                          accept="image/*"
+                          className="w-full border border-gray-300 rounded-lg p-2 text-sm text-gray-700 
+               file:bg-gray-100 file:border-0 file:py-0.5 file:px-4 file:rounded-lg
+               hover:file:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-900"
+                          onChange={handleFileChange}
+                          disabled={Boolean(
+                            checkoutData.status !== "on delivery"
+                          )}
+                        />
+                        {checkoutData.receipt && (
+                          <p className="text-sm text-slate-500 italic pl-0.5 font-medium">
+                            Receipt has been uploaded
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="border-[1px] border-gray-400 cursor-pointer hover:bg-gray-100 py-2"
+                        onClick={handleSendReceipt}
+                        disabled={Boolean(
+                          checkoutData.status !== "on delivery"
+                        )}
+                      >
+                        <SendHorizonal className="w-5 h-5 " />
+                        Send Receipt
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 {checkoutData.status == "paid" && (
                   <div className="flex justify-end gap-2">
                     <Button
