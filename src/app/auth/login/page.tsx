@@ -46,12 +46,13 @@ export default function Login() {
         .then(async (res) => {
           const responseData = res.data;
           if (responseData.token) {
-            const { token, name, email, role } = responseData;
+            const { token, name, email, address, role } = responseData;
             localStorage.setItem("accessToken", token);
             localStorage.setItem("userName", name);
             localStorage.setItem("userEmail", email);
             localStorage.setItem("userRoleID", role.id.toString());
             localStorage.setItem("userRoleName", role.name);
+            localStorage.setItem("userAddress", address);
           }
           const result = await Swal.fire({
             icon: "success",

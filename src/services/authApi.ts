@@ -14,6 +14,7 @@ interface LoginResponse {
     id: number;
     name: string;
     email: string;
+    address: string;
     role: Role;
   };
 }

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRegisterMutation } from "@/services/authApi";
 import Swal from "sweetalert2";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function Register() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function Register() {
     password: "",
     confirmPassword: "",
     phoneNumber: "",
+    address: "",
   });
   const [error, setError] = useState<{
     fullName: string;
@@ -23,12 +25,14 @@ export default function Register() {
     password: string;
     confirmPassword: string;
     phoneNumber: string;
+    address: string;
   }>({
     fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
     phoneNumber: "",
+    address: "",
   });
   const [loading, setLoading] = useState(false);
   const [register] = useRegisterMutation();
@@ -47,6 +51,7 @@ export default function Register() {
         ? ""
         : "Confirm password is required",
       phoneNumber: payload.phoneNumber ? "" : "Phone number is required",
+      address: payload.address ? "" : "Address is required",
     };
     setError(newErrors);
     return Object.values(newErrors).every((error) => error === "");
@@ -67,6 +72,7 @@ export default function Register() {
         email: payload.email,
         password: payload.password,
         phoneNumber: payload.phoneNumber,
+        address: payload.address,
       };
       await register(objectPayload)
         .unwrap()
@@ -136,45 +142,49 @@ export default function Register() {
               />
               {error && <p className="text-red-500 text-sm">{error.email}</p>}
             </div>
-            <div className="space-y-1">
-              <label
-                htmlFor="password"
-                className="text-sm font-medium text-gray-700"
-              >
-                Password<span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="password"
-                type="password"
-                value={payload.password}
-                onChange={(e) => handleChange("password", e.target.value)}
-                placeholder="Enter your password"
-                className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
-              />
-              {error && (
-                <p className="text-red-500 text-sm">{error.password}</p>
-              )}
-            </div>
-            <div className="space-y-1">
-              <label
-                htmlFor="confirmPassword"
-                className="text-sm font-medium text-gray-700"
-              >
-                Confirm Password<span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={payload.confirmPassword}
-                onChange={(e) =>
-                  handleChange("confirmPassword", e.target.value)
-                }
-                placeholder="Confirm your password"
-                className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
-              />
-              {error && (
-                <p className="text-red-500 text-sm">{error.confirmPassword}</p>
-              )}
+            <div className="flex justify-between gap-2">
+              <div className="space-y-1">
+                <label
+                  htmlFor="password"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Password<span className="text-red-500">*</span>
+                </label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={payload.password}
+                  onChange={(e) => handleChange("password", e.target.value)}
+                  placeholder="Enter your password"
+                  className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
+                />
+                {error && (
+                  <p className="text-red-500 text-sm">{error.password}</p>
+                )}
+              </div>
+              <div className="space-y-1">
+                <label
+                  htmlFor="confirmPassword"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Confirm Password<span className="text-red-500">*</span>
+                </label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={payload.confirmPassword}
+                  onChange={(e) =>
+                    handleChange("confirmPassword", e.target.value)
+                  }
+                  placeholder="Confirm your password"
+                  className="border-[1px] border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-5 w-full transition duration-300"
+                />
+                {error && (
+                  <p className="text-red-500 text-sm">
+                    {error.confirmPassword}
+                  </p>
+                )}
+              </div>
             </div>
             <div className="space-y-1">
               <label
@@ -194,6 +204,23 @@ export default function Register() {
               {error && (
                 <p className="text-red-500 text-sm">{error.phoneNumber}</p>
               )}
+            </div>
+            <div className="space-y-1">
+              <label
+                htmlFor="address"
+                className="text-sm text-gray-600 font-semibold"
+              >
+                Address<span className="text-red-500">*</span>
+              </label>
+              <Textarea
+                id="description"
+                name="description"
+                value={payload.address}
+                onChange={(e) => handleChange("address", e.target.value)}
+                placeholder="Enter your address..."
+                rows={3}
+              />
+              {error && <p className="text-red-500 text-sm">{error.address}</p>}
             </div>
             <div className="flex justify-center mt-4">
               <Button
