@@ -55,7 +55,7 @@ export default function CheckoutPage() {
       setCheckoutData({
         name: data.order.user.name || "",
         email: data.order.user.email || "",
-        address: data.order.address || "",
+        address: data.order.address || localStorage.getItem("address") || "",
         status: data.order.status || "",
         evidence: data.order.evidence || "",
         receipt: data.order.receipt || "",
