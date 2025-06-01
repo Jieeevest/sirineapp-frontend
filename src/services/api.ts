@@ -323,6 +323,13 @@ export const api = createApi({
         body: { rating, comments },
       }),
     }),
+    deliveredOrder: builder.mutation<Order, { id: number }>({
+      query: ({ id }) => ({
+        url: `/orders/${id}/delivered`,
+        method: "PUT",
+        body: {},
+      }),
+    }),
     sendReceiptOrder: builder.mutation<
       Order,
       { id: number; updatedOrder: any }
@@ -451,6 +458,7 @@ export const {
   useUpdateOrderMutation,
   useDeleteOrderMutation,
   useReviewOrderMutation,
+  useDeliveredOrderMutation,
   useSendReceiptOrderMutation,
   useGetUsersQuery,
   useGetUserByIdQuery,

@@ -17,6 +17,7 @@ import {
   Star,
 } from "lucide-react";
 import {
+  useDeliveredOrderMutation,
   useGetOrderByIdQuery,
   useReviewOrderMutation,
   useUpdateOrderMutation,
@@ -35,6 +36,7 @@ export default function CheckoutPage() {
 
   const [checkout] = useUpdateOrderMutation();
   const [review] = useReviewOrderMutation();
+  const [deliveredOrder] = useDeliveredOrderMutation();
   const [orderItems, setOrderItems] = useState<any>([]);
   const [checkoutData, setCheckoutData] = useState<any>({
     name: user?.name || "",
@@ -162,7 +164,30 @@ export default function CheckoutPage() {
           });
 
           if (result.isConfirmed) {
-            router.push("/customer/orders");
+            refetch();
+          }
+        });
+    } catch (error) {
+      console.error("Review failed:", error);
+    }
+  };
+
+  const handleDeliveredOrder = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      deliveredOrder({ id: Number(id) })
+        .unwrap()
+        .then(async () => {
+          const result = await Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "Order delivered successfully!",
+            confirmButtonText: "OK",
+          });
+
+          if (result.isConfirmed) {
+            refetch();
           }
         });
       refetch();
@@ -332,7 +357,7 @@ export default function CheckoutPage() {
                   </div>
                 </div>
               </div>
-              {checkoutData.status == "paid" && (
+              {checkoutData.status == "delivered" && (
                 <div className="h-[50%] px-4 border-t-[1px] pt-4  border-gray-300">
                   <div className="px-4">
                     <div className="flex justify-between">
@@ -407,9 +432,20 @@ export default function CheckoutPage() {
               )}
             </div>
             <div className="w-1/2 px-8 py-4 border-[1px] rounded-md shadow-sm border-gray-300">
-              <h2 className="text-lg font-semibold mb-4">
-                Payment Information
-              </h2>
+              <div className="flex justify-between">
+                <h2 className="text-lg font-semibold mb-4">
+                  Payment Information
+                </h2>
+                <Button
+                  type="reset"
+                  variant="outline"
+                  size="default"
+                  className="border-[1px] border-gray-400"
+                  onClick={(e) => handleDeliveredOrder(e)}
+                >
+                  <Check className="w-5 h-5 " />I have receive delivered product
+                </Button>
+              </div>
               <form onSubmit={handleCheckout} className="space-y-4">
                 <div className="space-y-1">
                   <label htmlFor="name" className="text-sm font-medium">

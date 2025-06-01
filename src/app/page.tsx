@@ -60,13 +60,19 @@ function convertBinaryImageToDataURL(
 
 export default function SirineSaleLanding() {
   const router = useRouter();
+  const images = [
+    "https://img.freepik.com/premium-photo/blue-police-car-light-night-city-with-selective-focus-bokeh-black-background_636705-5794.jpg?semt=ais_hybrid",
+    "/foto1.jpeg",
+    "/foto2.jpeg",
+    "/foto3.jpeg",
+    "/foto4.jpeg",
+    "/foto5.jpeg",
+  ];
   const [categories, setCategories] = useState<string[]>([]);
   const [products, setProducts] = useState<any[]>([]);
 
   const { data: categoriesData } = useGetPublicCategoriesQuery();
   const [createOrder, { isLoading }] = useCreateOrderMutation();
-
-  console.log(categoriesData);
 
   useEffect(() => {
     if (categoriesData) {
@@ -273,11 +279,36 @@ export default function SirineSaleLanding() {
     });
   };
 
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+    }, 4000); // Ganti slide tiap 4 detik
+
+    return () => clearInterval(timer); // Cleanup
+  }, [images.length]);
+
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   if (isLoading) return <Loading />;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white text-gray-800 py-4">
+      <header
+        className={`fixed bg-white top-0 left-0 w-full z-50 transition-all duration-300 border-b-[1px] border-slate-600 ${
+          isScrolled ? "py-3 shadow-md" : "bg-transparent py-3"
+        }`}
+      >
         <Container>
           <div className="flex justify-between items-center">
             <div className="text-2xl font-bold">
@@ -416,6 +447,43 @@ export default function SirineSaleLanding() {
         </Container>
       </header>
       <section className="relative h-[800px] flex items-center justify-center overflow-hidden px-6">
+        {images.map((src, index) => (
+          <Image
+            key={index}
+            src={src}
+            alt={`Background ${index + 1}`}
+            fill
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+              index === currentIndex ? "opacity-100 z-0" : "opacity-0"
+            }`}
+          />
+        ))}
+
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/40 z-0" />
+
+        {/* Konten */}
+        <div className="relative z-10 text-center max-w-4xl mx-auto">
+          <h1
+            className="text-5xl md:text-7xl font-extrabold text-white mb-6 md:mb-8"
+            style={{
+              textShadow:
+                "3px 3px 5px rgba(0, 0, 0, 0.3), 0 0 25px rgba(0, 0, 0, 0.3), 0 0 50px rgba(0, 0, 0, 0.3)",
+            }}
+          >
+            Gudang Sirine
+          </h1>
+          <p
+            className="text-xl md:text-2xl text-white mb-10 md:mb-12"
+            style={{
+              textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+            }}
+          >
+            Pusat Sirine Strobo Equipment
+          </p>
+        </div>
+      </section>
+      {/* <section className="relative h-[800px] flex items-center justify-center overflow-hidden px-6">
         <Image
           src="https://img.freepik.com/premium-photo/blue-police-car-light-night-city-with-selective-focus-bokeh-black-background_636705-5794.jpg?semt=ais_hybrid"
           alt="Sirine Perfume Background"
@@ -441,29 +509,6 @@ export default function SirineSaleLanding() {
             Pusat Sirine Strobo Equipment
           </p>
         </div>
-      </section>
-      {/* <section className="py-8 px-6 bg-gray-100">
-        <Container>
-          <div className="flex justify-between items-center gap-4">
-            <div>
-              <p className="font-bold text-lg">
-                You have selected{" "}
-                <span className="text-blue-600">{cart.length}</span> items in
-                your cart
-              </p>
-              <p className="font-bold text-lg">
-                Total Price:{" "}
-                <span className="text-blue-600">Rp. {calculateTotal()}</span>
-              </p>
-            </div>
-            <Button
-              onClick={() => setIsCartOpen(true)} // Open the modal
-              className="border-[1px] border-gray-300 shadow-sm bg-gradient-to-r from-blue-600 to-indigo-500 text-white px-8 py-3 rounded-full transition-all hover:scale-105 hover:from-blue-600 hover:to-indigo-500"
-            >
-              <span className="text-lg font-semibold">View Cart</span>
-            </Button>
-          </div>
-        </Container>
       </section> */}
 
       {/* Categories Section */}

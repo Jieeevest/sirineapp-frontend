@@ -48,7 +48,7 @@ export default function CheckoutPage() {
     evidence: "",
   });
 
-  const { data, isLoading } = useGetOrderByIdQuery(Number(id));
+  const { data, isLoading, refetch } = useGetOrderByIdQuery(Number(id));
 
   useEffect(() => {
     if (data) {
@@ -140,6 +140,8 @@ export default function CheckoutPage() {
             router.push("/admin/orders");
           }
         });
+
+      refetch();
     } catch (error) {
       setLoading(false);
       console.error("Checkout failed:", error);
