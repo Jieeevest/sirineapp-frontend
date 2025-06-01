@@ -277,7 +277,7 @@ export default function CheckoutPage() {
     <div className="flex min-h-screen w-full flex-col p-4">
       <h1 className="text-2xl font-semibold mb-4">Checkout</h1>
 
-      <Card className="w-full max-w-full">
+      <Card className="w-full max-w-full min-h-96">
         <CardHeader>
           <div className="flex justify-between border-b-2 border-gray-200 pb-3 ">
             <p className="text-sm text-gray-900 font-semibold">
@@ -300,6 +300,10 @@ export default function CheckoutPage() {
                     ? "bg-red-500"
                     : checkoutData.status == "paid"
                     ? "bg-green-500"
+                    : checkoutData.status == "on delivery"
+                    ? "bg-yellow-500"
+                    : checkoutData.status == "delivered"
+                    ? "bg-slate-800"
                     : "bg-blue-500"
                 } "`}
               >
@@ -436,15 +440,18 @@ export default function CheckoutPage() {
                 <h2 className="text-lg font-semibold mb-4">
                   Payment Information
                 </h2>
-                <Button
-                  type="reset"
-                  variant="outline"
-                  size="default"
-                  className="border-[1px] border-gray-400"
-                  onClick={(e) => handleDeliveredOrder(e)}
-                >
-                  <Check className="w-5 h-5 " />I have receive delivered product
-                </Button>
+                {checkoutData.status == "on delivery" && (
+                  <Button
+                    type="reset"
+                    variant="outline"
+                    size="default"
+                    className="border-[1px] border-gray-400"
+                    onClick={(e) => handleDeliveredOrder(e)}
+                  >
+                    <Check className="w-5 h-5 " />I have receive delivered
+                    product
+                  </Button>
+                )}
               </div>
               <form onSubmit={handleCheckout} className="space-y-4">
                 <div className="space-y-1">

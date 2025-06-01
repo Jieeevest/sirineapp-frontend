@@ -8,13 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Swal from "sweetalert2";
-import { ArrowLeft, Download, Save, SendHorizonal } from "lucide-react";
+import { ArrowLeft, Download, Save, SendHorizonal, Star } from "lucide-react";
 import {
   useGetOrderByIdQuery,
   useSendReceiptOrderMutation,
   useUpdateOrderMutation,
 } from "@/services/api";
 import Loading from "@/components/atoms/Loading";
+import Image from "next/image";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -40,6 +41,14 @@ export default function CheckoutPage() {
     status: "",
   });
 
+  const [hovered, setHovered] = useState(0);
+
+  const [reviewData, setReviewData] = useState<any>({
+    rating: 0,
+    isReviewed: false,
+    comments: "",
+  });
+
   const [errors, setErrors] = useState<{
     address: string;
     evidence: string;
@@ -60,7 +69,13 @@ export default function CheckoutPage() {
         evidence: data.order.evidence || "",
         receipt: data.order.receipt || "",
       });
+      setReviewData({
+        rating: data.order.rating || 0,
+        isReviewed: data.order.isReviewed || false,
+        comments: data.order.comments || "",
+      });
       setOrderItems(data.orderItems || []);
+      setHovered(0);
     }
   }, [data]);
 
@@ -224,11 +239,15 @@ export default function CheckoutPage() {
               Please fill in the form below to complete your purchase.
             </p>
             <div
-              className={`flex items-center text-sm justify-center rounded-md border-[1px] shadow-md text-white p-1 min-w-20 px-5 py-2 ${
+              className={`flex items-center text-sm justify-center rounded-md border-[1px] shadow-md text-white p-1 w-32 px-2 ${
                 checkoutData.status == "pending"
                   ? "bg-red-500"
                   : checkoutData.status == "paid"
                   ? "bg-green-500"
+                  : checkoutData.status == "on delivery"
+                  ? "bg-yellow-500"
+                  : checkoutData.status == "delivered"
+                  ? "bg-slate-800"
                   : "bg-blue-500"
               } "`}
             >
@@ -240,49 +259,125 @@ export default function CheckoutPage() {
         </CardHeader>
         <CardContent>
           <div className="flex justify-between gap-4">
-            <div className="w-1/2 px-8 py-4 border-[1px] rounded-md shadow-sm border-gray-300">
-              <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
+            <div className="w-1/2 border-[1px] rounded-md shadow-sm border-gray-300">
+              <div className="mb-4 h-1/2 px-8 py-4">
+                <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
 
-              <ul className="space-y-4">
-                {orderItems.map((item: any) => (
-                  <li
-                    key={item.id}
-                    className="flex justify-between border-b pb-2"
-                  >
-                    <div className="w-9/12">
-                      <h3 className="text-sm font-medium">
-                        {item.product.name}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        Quantity: {item.quantity} pcs
-                      </p>
-                    </div>
-                    <div className="items-start w-3/12">
-                      <span className="text-sm font-semibold ml-5">
-                        Rp {item.product.price.toLocaleString("id-ID")}
-                      </span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+                <ul className="space-y-4">
+                  {orderItems.map((item: any) => (
+                    <li
+                      key={item.id}
+                      className="flex justify-between border-b pb-2"
+                    >
+                      <div className="w-9/12">
+                        <h3 className="text-sm font-medium">
+                          {item.product.name}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          Quantity: {item.quantity} pcs
+                        </p>
+                      </div>
+                      <div className="items-start w-3/12">
+                        <span className="text-sm font-semibold ml-5">
+                          Rp {item.product.price.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
 
-              <div className="mt-4 flex justify-between font-semibold text-base">
-                <div className="w-9/12">
-                  <span>Total</span>
-                </div>
-                <div className="w-3/12 ">
-                  <span className="ml-5">
-                    Rp{" "}
-                    {orderItems
-                      .reduce(
-                        (acc: number, item: any) =>
-                          acc + item.product.price * item.quantity,
-                        0
-                      )
-                      .toLocaleString("id-ID")}
-                  </span>
+                <div className="mt-4 flex justify-between font-semibold text-base">
+                  <div className="w-9/12">
+                    <span>Total</span>
+                  </div>
+                  <div className="w-3/12 ">
+                    <span className="ml-5">
+                      Rp{" "}
+                      {orderItems
+                        .reduce(
+                          (acc: number, item: any) =>
+                            acc + item.product.price * item.quantity,
+                          0
+                        )
+                        .toLocaleString("id-ID")}
+                    </span>
+                  </div>
                 </div>
               </div>
+              {checkoutData.status == "delivered" && (
+                <div className="h-[50%] px-4 border-t-[1px] pt-4  border-gray-300">
+                  <div className="px-4">
+                    <div className="flex justify-between">
+                      <h2 className="text-lg font-semibold mb-4">
+                        Review Order
+                      </h2>
+                    </div>
+                    {reviewData.isReviewed ? (
+                      <>
+                        <div className="space-y-1 mb-4 ">
+                          <label
+                            htmlFor="address"
+                            className="text-sm font-medium"
+                          >
+                            Rating
+                          </label>
+                          <div className="flex items-center space-x-1">
+                            {[1, 2, 3, 4, 5].map((star) => {
+                              const isActive =
+                                star <= (hovered || reviewData.rating);
+
+                              return (
+                                <button
+                                  key={star}
+                                  type="button"
+                                  className={`text-xl transition-colors ${
+                                    isActive
+                                      ? "text-yellow-400"
+                                      : "text-gray-300 "
+                                  }`}
+                                  disabled={true}
+                                >
+                                  <Star
+                                    fill="currentColor"
+                                    stroke="currentColor"
+                                  />
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <label
+                            htmlFor="comments"
+                            className="text-sm font-medium"
+                          >
+                            Comments
+                          </label>
+                          <Textarea
+                            id="comments"
+                            name="comments"
+                            value={reviewData.comments}
+                            disabled={true}
+                            rows={3}
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <Image
+                          src={"/notfound.png"}
+                          alt="no review"
+                          width={150}
+                          height={150}
+                        />
+                        <p className="text-sm text-gray-700 font-semibold">
+                          Customer has not reviewed the order.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="w-1/2 px-8 py-4 border-[1px] rounded-md shadow-sm border-gray-300">
               <h2 className="text-lg font-semibold mb-4">
@@ -420,6 +515,7 @@ export default function CheckoutPage() {
                     </Button>
                   </div>
                 )}
+                <div className="space-y-1 h-[90px]"></div>
               </form>
             </div>
           </div>
