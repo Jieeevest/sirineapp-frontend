@@ -21,6 +21,7 @@ import {
   useReviewOrderMutation,
   useUpdateOrderMutation,
 } from "@/services/api";
+import Loading from "@/components/atoms/Loading";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -61,7 +62,7 @@ export default function CheckoutPage() {
     evidence: "",
   });
 
-  const { data, refetch } = useGetOrderByIdQuery(Number(id));
+  const { data, refetch, isLoading } = useGetOrderByIdQuery(Number(id));
 
   useEffect(() => {
     if (data) {
@@ -244,6 +245,8 @@ export default function CheckoutPage() {
     const whatsappUrl = `https://wa.me/${adminPhoneNumber}?text=${encodedMessage}`;
     window.open(whatsappUrl, "_blank");
   };
+
+  if (isLoading) return <Loading />;
 
   return (
     <div className="flex min-h-screen w-full flex-col p-4">
@@ -519,23 +522,26 @@ export default function CheckoutPage() {
                   )}
                 </div>
                 <div className="flex flex-col">
-                  <label
-                    htmlFor="paymentMethod"
-                    className="text-sm font-medium mr-5 mb-1"
-                  >
-                    Receipt
-                  </label>
                   {checkoutData.status == "on delivery" && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="lg"
-                      className="border-[1px] border-gray-400"
-                      onClick={handleDownloadReceipt}
-                    >
-                      <Download className="w-5 h-5 " />
-                      Download Receipt
-                    </Button>
+                    <>
+                      <label
+                        htmlFor="paymentMethod"
+                        className="text-sm font-medium mr-5 mb-1"
+                      >
+                        Receipt
+                      </label>
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="lg"
+                        className="border-[1px] border-gray-400"
+                        onClick={handleDownloadReceipt}
+                      >
+                        <Download className="w-5 h-5 " />
+                        Download Receipt
+                      </Button>
+                    </>
                   )}
                 </div>
 

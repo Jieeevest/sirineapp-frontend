@@ -211,8 +211,6 @@ export default function CheckoutPage() {
     return <Loading />;
   }
 
-  console.log(checkoutData.receipt);
-
   return (
     <div className="flex min-h-screen w-full flex-col p-4">
       <h1 className="text-2xl font-semibold mb-4">Checkout</h1>
