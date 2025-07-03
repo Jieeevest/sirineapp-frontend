@@ -29,6 +29,7 @@ import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/helpers/formatCurrency";
 import Loading from "@/components/atoms/Loading";
+import { addImage, getImages, removeImage } from "@/images";
 
 // Product type definition
 type Product = {
@@ -41,12 +42,12 @@ type Product = {
   quantity: number;
 };
 
-const user = {
-  accessToken: localStorage?.getItem("accessToken"),
-  name: localStorage?.getItem("userName"),
-  email: localStorage?.getItem("userEmail"),
-  role: localStorage?.getItem("userRoleName"),
-  avatar: "/avatars/shadcn.jpg",
+type User = {
+  accessToken: string | null;
+  name: string | null;
+  email: string | null;
+  role: string | null;
+  avatar: string;
 };
 
 function convertBinaryImageToDataURL(
@@ -60,19 +61,65 @@ function convertBinaryImageToDataURL(
 
 export default function SirineSaleLanding() {
   const router = useRouter();
-  const images = [
-    "https://img.freepik.com/premium-photo/blue-police-car-light-night-city-with-selective-focus-bokeh-black-background_636705-5794.jpg?semt=ais_hybrid",
-    "/foto1.jpeg",
-    "/foto2.jpeg",
-    "/foto3.jpeg",
-    "/foto4.jpeg",
-    "/foto5.jpeg",
-  ];
+  const [user, setUser] = useState<User>({
+    accessToken: null,
+    name: null,
+    email: null,
+    role: null,
+    avatar: "/avatars/shadcn.jpg",
+  });
+  const [images, setImages] = useState<string[]>([]);
+
+  useEffect(() => {
+    setImages(getImages());
+  }, []);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const dataUrl = reader.result as string;
+      addImage(dataUrl);
+      setImages(getImages());
+    };
+    reader.readAsDataURL(file); // konversi jadi base64 agar bisa disimpan di localStorage
+    await Swal.fire({
+      icon: "success",
+      title: "Success!",
+      text: "Add Image successfully!",
+      confirmButtonText: "OK",
+    });
+  };
+
+  const handleDeleteImage = async (url: string) => {
+    removeImage(url);
+    setImages(getImages());
+    await Swal.fire({
+      icon: "success",
+      title: "Success!",
+      text: "Delete Image successfully!",
+      confirmButtonText: "OK",
+    });
+  };
+
   const [categories, setCategories] = useState<string[]>([]);
   const [products, setProducts] = useState<any[]>([]);
 
   const { data: categoriesData } = useGetPublicCategoriesQuery();
   const [createOrder, { isLoading }] = useCreateOrderMutation();
+
+  useEffect(() => {
+    const userData: User = {
+      accessToken: localStorage.getItem("accessToken"),
+      name: localStorage.getItem("userName"),
+      email: localStorage.getItem("userEmail"),
+      role: localStorage.getItem("userRoleName"),
+      avatar: "/avatars/shadcn.jpg",
+    };
+    setUser(userData);
+  }, []);
 
   useEffect(() => {
     if (categoriesData) {
@@ -447,22 +494,24 @@ export default function SirineSaleLanding() {
         </Container>
       </header>
       <section className="relative h-[800px] flex items-center justify-center overflow-hidden px-6">
+        {/* Background Slideshow */}
         {images.map((src, index) => (
           <Image
             key={index}
             src={src}
             alt={`Background ${index + 1}`}
             fill
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-              index === currentIndex ? "opacity-100 z-0" : "opacity-0"
+            priority={index === currentIndex}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
+              index === currentIndex ? "opacity-100 z-0" : "opacity-0 z-[-1]"
             }`}
           />
         ))}
 
-        {/* Overlay */}
+        {/* Overlay Gelap */}
         <div className="absolute inset-0 bg-black/40 z-0" />
 
-        {/* Konten */}
+        {/* Konten Tengah */}
         <div className="relative z-10 text-center max-w-4xl mx-auto">
           <h1
             className="text-5xl md:text-7xl font-extrabold text-white mb-6 md:mb-8"
@@ -482,34 +531,26 @@ export default function SirineSaleLanding() {
             Pusat Sirine Strobo Equipment
           </p>
         </div>
+        {(user.role == "Super Admin" || user.role == "Admin") && (
+          <div className="absolute bottom-6 right-6 z-20 flex gap-3">
+            <label className="bg-white/80 hover:bg-white text-black px-4 py-2 rounded cursor-pointer text-sm font-medium shadow">
+              + Tambah Gambar
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleUpload}
+                className="hidden"
+              />
+            </label>
+            <Button
+              onClick={() => handleDeleteImage(images[currentIndex].toString())}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-medium shadow"
+            >
+              Hapus Gambar
+            </Button>
+          </div>
+        )}
       </section>
-      {/* <section className="relative h-[800px] flex items-center justify-center overflow-hidden px-6">
-        <Image
-          src="https://img.freepik.com/premium-photo/blue-police-car-light-night-city-with-selective-focus-bokeh-black-background_636705-5794.jpg?semt=ais_hybrid"
-          alt="Sirine Perfume Background"
-          fill
-          className="absolute z-0 object-cover opacity-100"
-        />
-        <div className="relative z-10 text-center max-w-4xl mx-auto">
-          <h1
-            className="text-5xl md:text-7xl font-extrabold text-white mb-6 md:mb-8"
-            style={{
-              textShadow:
-                "3px 3px 5px rgba(0, 0, 0, 0.3), 0 0 25px rgba(0, 0, 0, 0.3), 0 0 50px rgba(0, 0, 0, 0.3)",
-            }}
-          >
-            Gudang Sirine
-          </h1>
-          <p
-            className="text-xl md:text-2xl text-white mb-10 md:mb-12"
-            style={{
-              textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
-            }}
-          >
-            Pusat Sirine Strobo Equipment
-          </p>
-        </div>
-      </section> */}
 
       {/* Categories Section */}
       <section className="py-6 px-6">
@@ -541,7 +582,7 @@ export default function SirineSaleLanding() {
                 {selectedCategory}
               </h2>
             </div>
-            {products[selectedCategory]?.length === 0 ? (
+            {products[selectedCategory as any]?.length === 0 ? (
               <div className="flex justify-center items-center">
                 <p className="text-center text-gray-500 font-semibold text-xl">
                   No products available in this category.
@@ -549,67 +590,69 @@ export default function SirineSaleLanding() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {products[selectedCategory]?.map((item: any, index: any) => (
-                  <Card
-                    key={index}
-                    className={`bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-all hover:scale-105 hover:shadow-black/20 ease-in-out border-[1px] border-gray-300 hover:cursor-pointer`}
-                  >
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      width={300}
-                      height={300}
-                      className="w-full h-64 object-cover"
-                    />
-                    <CardHeader className="p-4 min-h-28">
-                      <CardTitle
-                        className="text-black text-base font-medium line-clamp-3"
-                        title={item.name} // Tooltip for the full text
-                      >
-                        {item.name}
-                      </CardTitle>
-                    </CardHeader>
-                    <p className="text-gray-500 text-sm font-medium px-4">
-                      <span className="">{item.quantity}</span> items left
-                    </p>
-
-                    <CardContent className="px-4">
-                      <p className="text-gray-700 text-lg font-bold">
-                        <span className="mr-2">
-                          {formatCurrency(item.price)}{" "}
-                          <span className="text-gray-500 text-sm font-medium">
-                            / item
-                          </span>
-                        </span>
+                {products[selectedCategory as any]?.map(
+                  (item: any, index: any) => (
+                    <Card
+                      key={index}
+                      className={`bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-all hover:scale-105 hover:shadow-black/20 ease-in-out border-[1px] border-gray-300 hover:cursor-pointer`}
+                    >
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        width={300}
+                        height={300}
+                        className="w-full h-64 object-cover"
+                      />
+                      <CardHeader className="p-4 min-h-28">
+                        <CardTitle
+                          className="text-black text-base font-medium line-clamp-3"
+                          title={item.name} // Tooltip for the full text
+                        >
+                          {item.name}
+                        </CardTitle>
+                      </CardHeader>
+                      <p className="text-gray-500 text-sm font-medium px-4">
+                        <span className="">{item.quantity}</span> items left
                       </p>
-                      <div className="flex items-center justify-start gap-1">
-                        <button
-                          key={1}
-                          type="button"
-                          className={`text-sm text-yellow-400 `}
-                          disabled={true}
-                        >
-                          <Star
-                            fill="currentColor"
-                            size={20}
-                            stroke="currentColor"
-                          />
-                        </button>
-                        <span className="text-gray-500 text-sm font-medium">
-                          3,5
-                        </span>
-                      </div>
-                      {user.accessToken && (
-                        <Button
-                          className="mt-4 w-full bg-gray-800 hover:bg-gray-900 hover:scale-105 text-white"
-                          onClick={() => handleAddToCart(item)}
-                        >
-                          Add to Cart
-                        </Button>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+
+                      <CardContent className="px-4">
+                        <p className="text-gray-700 text-lg font-bold">
+                          <span className="mr-2">
+                            {formatCurrency(item.price)}{" "}
+                            <span className="text-gray-500 text-sm font-medium">
+                              / item
+                            </span>
+                          </span>
+                        </p>
+                        <div className="flex items-center justify-start gap-1">
+                          <button
+                            key={1}
+                            type="button"
+                            className={`text-sm text-yellow-400 `}
+                            disabled={true}
+                          >
+                            <Star
+                              fill="currentColor"
+                              size={20}
+                              stroke="currentColor"
+                            />
+                          </button>
+                          <span className="text-gray-500 text-sm font-medium">
+                            3,5
+                          </span>
+                        </div>
+                        {user.accessToken && (
+                          <Button
+                            className="mt-4 w-full bg-gray-800 hover:bg-gray-900 hover:scale-105 text-white"
+                            onClick={() => handleAddToCart(item)}
+                          >
+                            Add to Cart
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )
+                )}
               </div>
             )}
           </Container>
